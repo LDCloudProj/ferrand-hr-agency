@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Dashboard — Ferrand HR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#152238; --navy-deep:#0B1424; --cream:#F5EFE1; --paper:#FBF7EC;
+    --stamp:#9C3B32; --gold:#C9973C; --teal:#3C6E62; --ink:#232A33; --line:rgba(21,34,56,0.15);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'IBM Plex Sans', sans-serif; background:var(--paper); color:var(--ink); min-height:100vh;}
+  h1,h2{font-family:'Fraunces', serif; color:var(--navy);}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit;}
+
+  /* LOGIN */
+  #loginScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:24px;}
+  .login-box{background:var(--paper); border:1.5px solid var(--gold); padding:40px; max-width:380px; width:100%;}
+  .login-box h1{font-size:1.4rem; margin-bottom:6px;}
+  .login-box .sub{font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--stamp); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:24px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field label{font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-family:'IBM Plex Mono', monospace; color:var(--navy);}
+  .field input, .field select, .field textarea{border:1.5px solid var(--line); padding:10px 12px; font-size:0.92rem; border-radius:2px; font-family:inherit;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--stamp);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; border-radius:2px; font-weight:600; font-size:0.88rem; border:1.5px solid transparent; cursor:pointer;}
+  .btn-primary{background:var(--gold); color:var(--navy-deep); width:100%;}
+  .btn-outline{border-color:var(--navy); color:var(--navy); background:transparent;}
+  .btn-danger{border-color:var(--stamp); color:var(--stamp); background:transparent;}
+  .btn-sm{padding:6px 12px; font-size:0.76rem;}
+  #loginError{color:var(--stamp); font-size:0.84rem; margin-top:10px; min-height:1.2em;}
+
+  /* DASHBOARD */
+  #dashboard{display:none;}
+  header{background:var(--navy); border-bottom:3px solid var(--gold); padding:16px 24px; display:flex; justify-content:space-between; align-items:center;}
+  header .name{color:var(--cream); font-family:'Fraunces', serif; font-weight:700; font-size:1.15rem;}
+  header .tag{color:var(--gold); font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase;}
+  #userEmail{color:rgba(245,239,225,0.7); font-size:0.8rem; margin-right:16px;}
+
+  .tabs{display:flex; gap:8px; padding:20px 24px 0; max-width:1100px; margin:0 auto;}
+  .tab-btn{font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.04em; text-transform:uppercase; padding:10px 18px; border:1.5px solid var(--navy); background:transparent; color:var(--navy); cursor:pointer; border-bottom:none;}
+  .tab-btn.active{background:var(--navy); color:var(--cream);}
+
+  main{max-width:1100px; margin:0 auto; padding:24px;}
+  .panel{display:none; border:1.5px solid var(--navy); background:var(--paper); padding:28px;}
+  .panel.active{display:block;}
+
+  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
+  .panel-head h2{font-size:1.3rem;}
+
+  table{width:100%; border-collapse:collapse; font-size:0.86rem;}
+  th{text-align:left; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); border-bottom:2px solid var(--navy); padding:8px 10px;}
+  td{padding:10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:hover td{background:var(--cream);}
+  .badge{font-family:'IBM Plex Mono', monospace; font-size:0.65rem; text-transform:uppercase; padding:3px 8px; border-radius:2px; display:inline-block;}
+  .badge-active{border:1px solid var(--teal); color:var(--teal);}
+  .badge-closed{border:1px solid #999; color:#999;}
+  .badge-new{border:1px solid var(--stamp); color:var(--stamp);}
+  .badge-contacted{border:1px solid var(--gold); color:var(--gold);}
+  .badge-hired{border:1px solid var(--teal); color:var(--teal);}
+  .badge-rejected{border:1px solid #999; color:#999;}
+  select.status-select{font-size:0.78rem; padding:4px 6px; border:1px solid var(--line);}
+
+  /* MODAL for add/edit job */
+  #jobModal{display:none; position:fixed; inset:0; background:rgba(11,20,36,0.6); align-items:center; justify-content:center; padding:20px; z-index:100;}
+  #jobModal .modal-box{background:var(--paper); border:1.5px solid var(--navy); padding:32px; max-width:520px; width:100%; max-height:90vh; overflow-y:auto;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:480px){.row-2{grid-template-columns:1fr;}}
+  .empty-note{color:#6b7078; font-size:0.9rem; padding:16px 0;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Staff Dashboard</h1>
+    <div class="sub">Ferrand HR International — Internal Use Only</div>
+    <form id="loginForm">
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" required></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPassword" required></div>
+      <button type="submit" class="btn btn-primary">Log in</button>
+      <div id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div>
+      <div class="name">FERRAND <span style="color:var(--gold)">HR</span></div>
+      <div class="tag">Staff Dashboard</div>
+    </div>
+    <div>
+      <span id="userEmail"></span>
+      <button class="btn btn-outline btn-sm" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="jobsPanel">Job Postings</button>
+    <button class="tab-btn" data-tab="appsPanel">Applications</button>
+  </div>
+
+  <main>
+    <!-- JOBS PANEL -->
+    <div class="panel active" id="jobsPanel">
+      <div class="panel-head">
+        <h2>Job Postings</h2>
+        <button class="btn btn-primary btn-sm" id="newJobBtn">+ Add job posting</button>
+      </div>
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Destination</th><th>Slots</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="jobsTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- APPLICATIONS PANEL -->
+    <div class="panel" id="appsPanel">
+      <div class="panel-head"><h2>Applications</h2></div>
+      <table>
+        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>Status</th></tr></thead>
+        <tbody id="appsTableBody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- JOB ADD/EDIT MODAL -->
+<div id="jobModal">
+  <div class="modal-box">
+    <h2 id="modalTitle" style="font-size:1.1rem; margin-bottom:18px;">Add job posting</h2>
+    <form id="jobForm">
+      <input type="hidden" id="jobId">
+      <div class="field"><label>Job title</label><input type="text" id="jTitle" required></div>
+      <div class="field"><label>Employer</label><input type="text" id="jEmployer" required></div>
+      <div class="row-2">
+        <div class="field"><label>Category</label>
+          <select id="jCategory" required>
+            <option value="domestic_helper">Domestic Helper</option>
+            <option value="skilled_worker">Skilled Worker</option>
+          </select>
+        </div>
+        <div class="field"><label>Destination</label><input type="text" id="jDestination" placeholder="e.g. Hong Kong" required></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label>Slots</label><input type="number" id="jSlots" min="1"></div>
+        <div class="field"><label>MWO code (optional)</label><input type="text" id="jMwo"></div>
+      </div>
+      <div class="field"><label>Salary / pay</label><input type="text" id="jSalary" placeholder="e.g. SAR 5,000/mo + SAR 300 food"></div>
+      <div class="field"><label>Requirements (one per line)</label><textarea id="jRequirements" rows="4"></textarea></div>
+      <div class="field"><label>Status</label>
+        <select id="jStatus">
+          <option value="active">Active</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteJobBtn" style="display:none; margin-left:auto;">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://mxyxjslxseajyqjqcdxh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_uxkjmFJsOi1dXC90fIjGuQ_nO6X2L9L";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const loginScreen = document.getElementById('loginScreen');
+  const dashboard = document.getElementById('dashboard');
+
+  // ---- AUTH ----
+  async function checkSession(){
+    const { data } = await sb.auth.getSession();
+    if (data.session){
+      showDashboard(data.session.user.email);
+    } else {
+      loginScreen.style.display = 'flex';
+      dashboard.style.display = 'none';
+    }
+  }
+
+  function showDashboard(email){
+    loginScreen.style.display = 'none';
+    dashboard.style.display = 'block';
+    document.getElementById('userEmail').textContent = email;
+    loadJobs();
+    loadApplications();
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    errorEl.textContent = '';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      errorEl.textContent = 'Incorrect email or password.';
+      return;
+    }
+    showDashboard(data.user.email);
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    checkSession();
+  });
+
+  // ---- TABS ----
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---- JOBS ----
+  let jobsCache = [];
+  const categoryLabel = { domestic_helper: "Domestic Helper", skilled_worker: "Skilled Worker" };
+
+  async function loadJobs(){
+    const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('jobsTableBody');
+    if (error){ tbody.innerHTML = `<tr><td colspan="6" class="empty-note">Could not load jobs.</td></tr>`; return; }
+    jobsCache = data || [];
+    if (jobsCache.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-note">No job postings yet.</td></tr>`; return; }
+
+    tbody.innerHTML = jobsCache.map(job => `
+      <tr>
+        <td><strong>${job.title}</strong><br><span class="mono" style="font-size:0.72rem; color:#888;">${job.employer}</span></td>
+        <td>${categoryLabel[job.category] || job.category}</td>
+        <td>${job.destination}</td>
+        <td>${job.slots ?? '—'}</td>
+        <td><span class="badge badge-${job.status}">${job.status}</span></td>
+        <td><button class="btn btn-outline btn-sm edit-job-btn" data-id="${job.id}">Edit</button></td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.edit-job-btn').forEach(btn => {
+      btn.addEventListener('click', () => openJobModal(btn.dataset.id));
+    });
+  }
+
+  function openJobModal(jobId){
+    const modal = document.getElementById('jobModal');
+    const deleteBtn = document.getElementById('deleteJobBtn');
+    document.getElementById('jobForm').reset();
+
+    if (jobId){
+      const job = jobsCache.find(j => j.id === jobId);
+      document.getElementById('modalTitle').textContent = 'Edit job posting';
+      document.getElementById('jobId').value = job.id;
+      document.getElementById('jTitle').value = job.title;
+      document.getElementById('jEmployer').value = job.employer;
+      document.getElementById('jCategory').value = job.category;
+      document.getElementById('jDestination').value = job.destination;
+      document.getElementById('jSlots').value = job.slots || '';
+      document.getElementById('jMwo').value = job.mwo_code || '';
+      document.getElementById('jSalary').value = job.salary || '';
+      document.getElementById('jRequirements').value = job.requirements || '';
+      document.getElementById('jStatus').value = job.status;
+      deleteBtn.style.display = 'inline-flex';
+    } else {
+      document.getElementById('modalTitle').textContent = 'Add job posting';
+      document.getElementById('jobId').value = '';
+      deleteBtn.style.display = 'none';
+    }
+    modal.style.display = 'flex';
+  }
+
+  document.getElementById('newJobBtn').addEventListener('click', () => openJobModal(null));
+  document.getElementById('cancelModalBtn').addEventListener('click', () => {
+    document.getElementById('jobModal').style.display = 'none';
+  });
+
+  document.getElementById('jobForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const jobId = document.getElementById('jobId').value;
+    const payload = {
+      title: document.getElementById('jTitle').value,
+      employer: document.getElementById('jEmployer').value,
+      category: document.getElementById('jCategory').value,
+      destination: document.getElementById('jDestination').value,
+      slots: document.getElementById('jSlots').value ? parseInt(document.getElementById('jSlots').value) : null,
+      mwo_code: document.getElementById('jMwo').value || null,
+      salary: document.getElementById('jSalary').value || null,
+      requirements: document.getElementById('jRequirements').value || null,
+      status: document.getElementById('jStatus').value
+    };
+
+    let error;
+    if (jobId){
+      ({ error } = await sb.from('jobs').update(payload).eq('id', jobId));
+    } else {
+      ({ error } = await sb.from('jobs').insert(payload));
+    }
+
+    if (error){ alert('Could not save job posting. ' + error.message); return; }
+    document.getElementById('jobModal').style.display = 'none';
+    loadJobs();
+  });
+
+  document.getElementById('deleteJobBtn').addEventListener('click', async () => {
+    const jobId = document.getElementById('jobId').value;
+    if (!confirm('Delete this job posting? This cannot be undone.')) return;
+    const { error } = await sb.from('jobs').delete().eq('id', jobId);
+    if (error){ alert('Could not delete job. ' + error.message); return; }
+    document.getElementById('jobModal').style.display = 'none';
+    loadJobs();
+  });
+
+  // ---- APPLICATIONS ----
+  async function loadApplications(){
+    const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('appsTableBody');
+    if (error){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">Could not load applications.</td></tr>`; return; }
+    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">No applications yet.</td></tr>`; return; }
+
+    tbody.innerHTML = data.map(app => `
+      <tr>
+        <td class="mono" style="font-size:0.76rem;">${new Date(app.created_at).toLocaleDateString()}</td>
+        <td><strong>${app.full_name}</strong></td>
+        <td>${app.contact_number}${app.email ? '<br><span style="font-size:0.76rem; color:#888;">' + app.email + '</span>' : ''}</td>
+        <td>${app.job_title_snapshot || '—'}</td>
+        <td>${app.experience || '—'}</td>
+        <td style="max-width:220px;">${app.message || '—'}</td>
+        <td>
+          <select class="status-select" data-id="${app.id}">
+            <option value="new" ${app.status==='new'?'selected':''}>New</option>
+            <option value="contacted" ${app.status==='contacted'?'selected':''}>Contacted</option>
+            <option value="hired" ${app.status==='hired'?'selected':''}>Hired</option>
+            <option value="rejected" ${app.status==='rejected'?'selected':''}>Rejected</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.status-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const { error } = await sb.from('applications').update({ status: sel.value }).eq('id', sel.dataset.id);
+        if (error) alert('Could not update status.');
+      });
+    });
+  }
+
+  checkSession();
+</script>
+
+</body>
+</html>

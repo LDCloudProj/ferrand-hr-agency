@@ -6,6 +6,7 @@
 <title>Ferrand Human Resources International</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --navy:#152238;
@@ -14,202 +15,109 @@
     --paper:#FBF7EC;
     --stamp:#9C3B32;
     --gold:#C9973C;
+    --teal:#3C6E62;
     --ink:#232A33;
     --line: rgba(21,34,56,0.18);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
-  body{
-    font-family:'IBM Plex Sans', sans-serif;
-    background:var(--paper);
-    color:var(--ink);
-    line-height:1.5;
-  }
+  body{font-family:'IBM Plex Sans', sans-serif; background:var(--paper); color:var(--ink); line-height:1.5;}
   h1,h2,h3{font-family:'Fraunces', serif; font-weight:700; color:var(--navy);}
   .mono{font-family:'IBM Plex Mono', monospace; letter-spacing:0.04em;}
   a{color:inherit; text-decoration:none;}
-  img,svg{display:block;}
 
-  /* ---------- NAV ---------- */
-  header{
-    position:sticky; top:0; z-index:50;
-    background:var(--navy);
-    border-bottom:3px solid var(--gold);
-  }
-  .nav-wrap{
-    max-width:1100px; margin:0 auto; padding:16px 24px;
-    display:flex; align-items:center; justify-content:space-between;
-  }
+  header{position:sticky; top:0; z-index:50; background:var(--navy); border-bottom:3px solid var(--gold);}
+  .nav-wrap{max-width:1100px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between;}
   .brand{color:var(--cream);}
-  .brand .name{font-family:'Fraunces', serif; font-weight:700; font-size:1.3rem; letter-spacing:0.01em;}
-  .brand .tag{font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--gold); letter-spacing:0.12em; text-transform:uppercase;}
-  nav{display:flex; gap:28px;}
-  nav a{color:var(--cream); font-size:0.92rem; font-weight:500; opacity:0.85; transition:opacity 0.2s;}
+  .brand .name{font-family:'Fraunces', serif; font-weight:700; font-size:1.3rem;}
+  .brand .tag{font-family:'IBM Plex Mono', monospace; font-size:0.62rem; color:var(--gold); letter-spacing:0.12em; text-transform:uppercase;}
+  nav{display:flex; gap:26px;}
+  nav a{color:var(--cream); font-size:0.9rem; font-weight:500; opacity:0.85;}
   nav a:hover{opacity:1; color:var(--gold);}
-  @media (max-width:640px){ nav{gap:16px;} nav a{font-size:0.8rem;} }
+  @media (max-width:640px){ nav{gap:14px;} nav a{font-size:0.78rem;} }
 
-  /* ---------- HERO ---------- */
-  .hero{
-    background:var(--navy);
-    color:var(--cream);
-    position:relative;
-    overflow:hidden;
-    padding:72px 24px 96px;
-  }
-  .hero::before{
-    content:"";
-    position:absolute; inset:0;
-    background-image:
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 64px),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 64px);
-    pointer-events:none;
-  }
-  .hero-inner{max-width:1100px; margin:0 auto; position:relative; display:grid; grid-template-columns:1.3fr 0.7fr; gap:40px; align-items:center;}
-  @media (max-width:800px){ .hero-inner{grid-template-columns:1fr;} }
-  .eyebrow{
-    font-family:'IBM Plex Mono', monospace; font-size:0.75rem; letter-spacing:0.15em;
-    color:var(--gold); text-transform:uppercase; margin-bottom:18px;
-  }
-  .hero h1{font-size:2.6rem; line-height:1.12; color:var(--paper); max-width:560px;}
-  .hero h1 em{font-style:italic; color:var(--gold);}
-  .hero p{margin-top:20px; font-size:1.05rem; color:rgba(245,239,225,0.82); max-width:480px;}
-  .hero-ctas{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
-  .btn{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:13px 24px; border-radius:2px; font-weight:600; font-size:0.92rem;
-    border:1.5px solid transparent; cursor:pointer; transition:transform 0.15s ease, background 0.2s;
-  }
+  .hero{background:var(--navy); color:var(--cream); position:relative; overflow:hidden; padding:64px 24px 80px;}
+  .hero::before{content:""; position:absolute; inset:0;
+    background-image:repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 64px),
+                      repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 64px);
+    pointer-events:none;}
+  .hero-inner{max-width:1100px; margin:0 auto; position:relative;}
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.14em; color:var(--gold); text-transform:uppercase; margin-bottom:16px;}
+  .hero h1{font-size:2.3rem; line-height:1.15; max-width:620px; color:var(--paper);}
+  .hero p{margin-top:16px; font-size:1rem; color:rgba(245,239,225,0.82); max-width:520px;}
+  .hero-ctas{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap;}
+  .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:2px; font-weight:600; font-size:0.88rem; border:1.5px solid transparent; cursor:pointer;}
   .btn-primary{background:var(--gold); color:var(--navy-deep);}
-  .btn-primary:hover{transform:translateY(-2px);}
-  .btn-ghost{border-color:rgba(245,239,225,0.4); color:var(--paper);}
+  .btn-ghost{border-color:rgba(245,239,225,0.4); color:var(--paper); background:transparent;}
   .btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
 
-  /* stamp seal */
-  .seal-wrap{display:flex; justify-content:center;}
-  .seal{
-    width:200px; height:200px; border-radius:50%;
-    border:3px double var(--gold);
-    display:flex; align-items:center; justify-content:center;
-    transform:rotate(-9deg);
-    position:relative;
-    color:var(--gold);
-  }
-  .seal::before{
-    content:""; position:absolute; inset:10px; border-radius:50%; border:1px dashed rgba(201,151,60,0.55);
-  }
-  .seal-text{text-align:center; font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.1em; line-height:1.6; text-transform:uppercase;}
-  .seal-text .big{font-family:'Fraunces', serif; font-size:1rem; font-weight:700; letter-spacing:0.03em; margin:4px 0; text-transform:none;}
+  .trust{background:var(--cream); border-bottom:1px solid var(--line); border-top:1px solid var(--line);}
+  .trust-inner{max-width:1100px; margin:0 auto; padding:12px 24px; display:flex; gap:28px; flex-wrap:wrap; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--navy);}
+  .trust-inner b{color:var(--stamp);}
 
-  /* ---------- TRUST STRIP ---------- */
-  .trust{
-    background:var(--cream); border-bottom:1px solid var(--line); border-top:1px solid var(--line);
-  }
-  .trust-inner{
-    max-width:1100px; margin:0 auto; padding:14px 24px;
-    display:flex; gap:32px; flex-wrap:wrap; justify-content:space-between;
-    font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--navy); letter-spacing:0.03em;
-  }
-  .trust-inner span b{color:var(--stamp);}
-
-  /* ---------- SECTION shared ---------- */
-  section{padding:80px 24px;}
+  section{padding:64px 24px;}
   .section-inner{max-width:1100px; margin:0 auto;}
-  .section-head{margin-bottom:44px; max-width:600px;}
+  .section-head{margin-bottom:32px; max-width:600px;}
   .section-head .eyebrow{color:var(--stamp);}
-  .section-head h2{font-size:2rem;}
-  .section-head p{margin-top:12px; color:#5a5f68;}
+  .section-head h2{font-size:1.8rem;}
+  .section-head p{margin-top:10px; color:#5a5f68;}
 
-  /* ---------- JOBS (boarding pass cards) ---------- */
-  .jobs-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:28px;}
-  .job-card{
-    background:var(--paper);
-    border:1.5px solid var(--navy);
-    position:relative;
-    display:flex;
-    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  .filter-bar{display:flex; gap:10px; margin-bottom:32px; flex-wrap:wrap;}
+  .filter-btn{
+    font-family:'IBM Plex Mono', monospace; font-size:0.75rem; letter-spacing:0.05em; text-transform:uppercase;
+    padding:9px 16px; border:1.5px solid var(--navy); color:var(--navy); background:transparent; cursor:pointer; border-radius:2px;
+    transition:all 0.15s;
   }
+  .filter-btn.active{background:var(--navy); color:var(--cream);}
+
+  .jobs-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;}
+  .job-card{background:var(--paper); border:1.5px solid var(--navy); display:flex; transition:transform 0.2s ease, box-shadow 0.2s ease;}
   .job-card:hover{transform:translateY(-4px); box-shadow:0 14px 28px rgba(21,34,56,0.14);}
-  .job-main{flex:1; padding:26px 24px;}
-  .job-stub{
-    width:96px; flex-shrink:0; background:var(--navy); color:var(--cream);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-    padding:16px 8px; text-align:center;
-    border-left:2px dashed var(--gold);
-    position:relative;
-  }
-  .job-stub::before, .job-stub::after{
-    content:""; position:absolute; width:16px; height:16px; background:var(--paper); border-radius:50%;
-    left:-8px;
-  }
+  .job-main{flex:1; padding:24px 22px; min-width:0;}
+  .job-stub{width:92px; flex-shrink:0; color:var(--cream); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px 6px; text-align:center; border-left:2px dashed var(--gold); position:relative;}
+  .job-stub::before, .job-stub::after{content:""; position:absolute; width:16px; height:16px; background:var(--paper); border-radius:50%; left:-8px;}
   .job-stub::before{top:-8px;} .job-stub::after{bottom:-8px;}
-  .job-stub .dest{font-family:'Fraunces', serif; font-weight:700; font-size:0.95rem;}
-  .job-stub .code{font-family:'IBM Plex Mono', monospace; font-size:0.65rem; letter-spacing:0.08em; color:var(--gold);}
-  .job-tag{
-    display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.65rem;
-    letter-spacing:0.08em; text-transform:uppercase; color:var(--stamp);
-    border:1px solid var(--stamp); padding:3px 8px; border-radius:2px; margin-bottom:12px;
-  }
-  .job-main h3{font-size:1.25rem; margin-bottom:4px;}
-  .job-main .employer{font-size:0.85rem; color:#6b7078; margin-bottom:14px;}
-  .job-list{list-style:none; font-size:0.88rem; color:var(--ink); display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
-  .job-list li{padding-left:16px; position:relative;}
+  .job-stub .dest{font-family:'Fraunces', serif; font-weight:700; font-size:0.88rem;}
+  .job-stub .code{font-family:'IBM Plex Mono', monospace; font-size:0.6rem; letter-spacing:0.06em; color:var(--gold);}
+  .job-tag{display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; margin-bottom:10px; margin-right:6px;}
+  .tag-skilled{color:var(--stamp); border:1px solid var(--stamp);}
+  .tag-dh{color:var(--teal); border:1px solid var(--teal);}
+  .job-main h3{font-size:1.12rem; margin-bottom:3px;}
+  .job-main .employer{font-size:0.82rem; color:#6b7078; margin-bottom:12px;}
+  .job-list{list-style:none; font-size:0.85rem; display:flex; flex-direction:column; gap:5px; margin-bottom:14px;}
+  .job-list li{padding-left:15px; position:relative;}
   .job-list li::before{content:"—"; position:absolute; left:0; color:var(--gold);}
-  .job-salary{
-    font-family:'IBM Plex Mono', monospace; font-size:0.95rem; font-weight:600; color:var(--navy);
-    background:var(--cream); display:inline-block; padding:6px 12px; border:1px dashed var(--line);
-  }
-  .job-apply{margin-top:16px;}
-  .job-apply a{font-size:0.85rem; font-weight:600; color:var(--stamp); border-bottom:1.5px solid var(--stamp); padding-bottom:2px;}
+  .job-salary{font-family:'IBM Plex Mono', monospace; font-size:0.88rem; font-weight:600; color:var(--navy); background:var(--cream); display:inline-block; padding:5px 10px; border:1px dashed var(--line);}
+  .job-apply{margin-top:14px;}
+  .job-apply a{font-size:0.82rem; font-weight:600; color:var(--stamp); border-bottom:1.5px solid var(--stamp); padding-bottom:2px;}
+  .empty-note{color:#6b7078; font-size:0.9rem; padding:24px 0;}
 
-  .job-card.coming{
-    align-items:center; justify-content:center; border-style:dashed; opacity:0.85;
-  }
-  .job-card.coming .job-main{text-align:center; padding:40px 24px;}
-  .job-card.coming h3{font-size:1.1rem; color:#6b7078;}
-
-  /* ---------- ABOUT ---------- */
   .about{background:var(--navy); color:var(--cream);}
   .about .section-head p{color:rgba(245,239,225,0.75);}
   .about .section-head .eyebrow{color:var(--gold);}
-  .about-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:28px;}
+  .about-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;}
   @media (max-width:760px){.about-grid{grid-template-columns:1fr;}}
-  .about-card{border-top:2px solid var(--gold); padding-top:16px;}
-  .about-card h4{font-family:'Fraunces', serif; font-size:1.05rem; color:var(--paper); margin-bottom:8px;}
-  .about-card p{font-size:0.9rem; color:rgba(245,239,225,0.7);}
+  .about-card{border-top:2px solid var(--gold); padding-top:14px;}
+  .about-card h4{font-family:'Fraunces', serif; font-size:1rem; color:var(--paper); margin-bottom:6px;}
+  .about-card p{font-size:0.87rem; color:rgba(245,239,225,0.7);}
 
-  /* ---------- APPLY FORM ---------- */
-  .apply-wrap{
-    background:var(--paper); border:1.5px solid var(--navy); padding:40px;
-    display:grid; grid-template-columns:1fr; gap:20px; max-width:680px;
-  }
-  .apply-wrap .stamp-corner{
-    position:absolute; margin-top:-40px; margin-left:calc(100% - 100px);
-  }
+  .apply-wrap{background:var(--paper); border:1.5px solid var(--navy); padding:36px; display:grid; gap:18px; max-width:660px;}
   .field{display:flex; flex-direction:column; gap:6px;}
-  .field label{font-size:0.78rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--navy); font-family:'IBM Plex Mono', monospace;}
-  .field input, .field select, .field textarea{
-    border:1.5px solid var(--line); background:var(--paper); padding:11px 12px; font-family:'IBM Plex Sans', sans-serif;
-    font-size:0.95rem; color:var(--ink); border-radius:2px;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus{
-    outline:none; border-color:var(--stamp);
-  }
-  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .field label{font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--navy); font-family:'IBM Plex Mono', monospace;}
+  .field input, .field select, .field textarea{border:1.5px solid var(--line); background:var(--paper); padding:10px 12px; font-family:'IBM Plex Sans', sans-serif; font-size:0.92rem; color:var(--ink); border-radius:2px;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--stamp);}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
   @media (max-width:520px){.row-2{grid-template-columns:1fr;}}
-  .form-note{font-size:0.8rem; color:#6b7078;}
-  #formStatus{font-size:0.88rem; font-weight:600; margin-top:6px;}
+  #formStatus{font-size:0.86rem; font-weight:600; margin-top:4px;}
 
-  /* ---------- FOOTER ---------- */
-  footer{background:var(--navy-deep); color:rgba(245,239,225,0.7); padding:48px 24px 32px;}
-  .footer-inner{max-width:1100px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr; gap:32px;}
+  footer{background:var(--navy-deep); color:rgba(245,239,225,0.7); padding:44px 24px 28px;}
+  .footer-inner{max-width:1100px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr; gap:28px;}
   @media (max-width:700px){.footer-inner{grid-template-columns:1fr;}}
-  footer h5{color:var(--gold); font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;}
-  footer p, footer a{font-size:0.85rem; line-height:1.7;}
-  .footer-warn{
-    margin-top:32px; padding-top:20px; border-top:1px solid rgba(245,239,225,0.15);
-    font-size:0.78rem; color:rgba(245,239,225,0.5); max-width:720px;
-  }
+  footer h5{color:var(--gold); font-family:'IBM Plex Mono', monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;}
+  footer p, footer a{font-size:0.83rem; line-height:1.7;}
+  .footer-warn{margin-top:28px; padding-top:18px; border-top:1px solid rgba(245,239,225,0.15); font-size:0.76rem; color:rgba(245,239,225,0.5); max-width:720px;}
   .footer-warn b{color:var(--gold);}
+  .staff-link{font-size:0.68rem; opacity:0.4;}
 </style>
 </head>
 <body>
@@ -231,23 +139,12 @@
 
 <section class="hero">
   <div class="hero-inner">
-    <div>
-      <div class="eyebrow">POEA / DMW Licensed Recruitment Agency</div>
-      <h1>Your paperwork,<br>your placement,<br><em>your passage abroad.</em></h1>
-      <p>Ferrand Human Resources International connects qualified Filipino professionals with verified employers overseas — properly licensed, properly documented, every step of the way.</p>
-      <div class="hero-ctas">
-        <a href="#jobs" class="btn btn-primary">View Open Positions</a>
-        <a href="#contact" class="btn btn-ghost">Verify Our License</a>
-      </div>
-    </div>
-    <div class="seal-wrap">
-      <div class="seal">
-        <div class="seal-text">
-          Licensed Agency
-          <div class="big">175-LB-<br>112222-R</div>
-          DMW / POEA
-        </div>
-      </div>
+    <div class="eyebrow">POEA / DMW Licensed Recruitment Agency</div>
+    <h1>Domestic Helper roles in HK &amp; Malaysia. Skilled Worker roles in Saudi. One trusted agency.</h1>
+    <p>Ferrand Human Resources International places qualified Filipino workers with verified employers overseas — properly licensed, properly documented, every step of the way.</p>
+    <div class="hero-ctas">
+      <a href="#jobs" class="btn btn-primary">View Open Positions</a>
+      <a href="#contact" class="btn btn-ghost">Verify Our License</a>
     </div>
   </div>
 </section>
@@ -265,9 +162,16 @@
     <div class="section-head">
       <div class="eyebrow mono">Open Positions</div>
       <h2>Current overseas openings</h2>
-      <p>Every listing below is tied to a verified employer and MWO accreditation. Click apply to fill in the form at the bottom of this page.</p>
+      <p>Every listing is tied to a verified employer. Filter by the kind of work you're looking for.</p>
     </div>
-    <div class="jobs-grid" id="jobsGrid"></div>
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="domestic_helper">Domestic Helper (HK / Malaysia)</button>
+      <button class="filter-btn" data-filter="skilled_worker">Skilled Worker (Saudi)</button>
+    </div>
+    <div class="jobs-grid" id="jobsGrid">
+      <p class="empty-note">Loading current openings…</p>
+    </div>
   </div>
 </section>
 
@@ -281,11 +185,11 @@
     <div class="about-grid">
       <div class="about-card">
         <h4>Licensed &amp; Accredited</h4>
-        <p>Operating under POEA/DMW License No. 175-LB-112222-R. Every job order carries its own MWO accreditation number, which we publish alongside the listing.</p>
+        <p>Operating under POEA/DMW License No. 175-LB-112222-R. Every job order carries its own MWO accreditation number, published alongside the listing.</p>
       </div>
       <div class="about-card">
-        <h4>Direct Employer Coordination</h4>
-        <p>We work straight with the hiring hospital or company — no unlicensed sub-agents, no hidden placement fees passed on to applicants.</p>
+        <h4>Two Placement Tracks</h4>
+        <p>Domestic Helper deployment to Hong Kong and Malaysia, and Skilled Worker deployment to Saudi Arabia — each with its own requirements and process.</p>
       </div>
       <div class="about-card">
         <h4>Document Support</h4>
@@ -300,44 +204,21 @@
     <div class="section-head">
       <div class="eyebrow mono">Application</div>
       <h2>Apply for a position</h2>
-      <p>Fill in your details below. Submitting opens your email app with everything pre-filled, addressed to our recruitment desk — attach your CV there before sending.</p>
+      <p>Fill in your details below and submit — our staff will review it directly and reach out.</p>
     </div>
 
     <form class="apply-wrap" id="applyForm">
       <div class="row-2">
-        <div class="field">
-          <label for="fname">Full name</label>
-          <input type="text" id="fname" required>
-        </div>
-        <div class="field">
-          <label for="fcontact">Contact number</label>
-          <input type="tel" id="fcontact" required>
-        </div>
+        <div class="field"><label for="fname">Full name</label><input type="text" id="fname" required></div>
+        <div class="field"><label for="fcontact">Contact number</label><input type="tel" id="fcontact" required></div>
       </div>
       <div class="row-2">
-        <div class="field">
-          <label for="femail">Email address</label>
-          <input type="email" id="femail" required>
-        </div>
-        <div class="field">
-          <label for="fposition">Position applying for</label>
-          <select id="fposition"></select>
-        </div>
+        <div class="field"><label for="femail">Email address</label><input type="email" id="femail"></div>
+        <div class="field"><label for="fposition">Position applying for</label><select id="fposition" required></select></div>
       </div>
-      <div class="field">
-        <label for="fexp">Years of clinical / relevant experience</label>
-        <input type="text" id="fexp" placeholder="e.g. 3 years">
-      </div>
-      <div class="field">
-        <label for="fmessage">Message (optional)</label>
-        <textarea id="fmessage" rows="4" placeholder="Anything else we should know?"></textarea>
-      </div>
-      <div class="field">
-        <label>CV / resume</label>
-        <input type="file" id="fcv">
-        <div class="form-note">This form can't attach files directly — after it opens your email app, attach your CV there manually before sending.</div>
-      </div>
-      <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Prepare application email</button>
+      <div class="field"><label for="fexp">Years of relevant experience</label><input type="text" id="fexp" placeholder="e.g. 3 years"></div>
+      <div class="field"><label for="fmessage">Message (optional)</label><textarea id="fmessage" rows="4" placeholder="Anything else we should know?"></textarea></div>
+      <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Submit application</button>
       <div id="formStatus"></div>
     </form>
   </div>
@@ -357,7 +238,7 @@
     </div>
     <div>
       <h5>Navigate</h5>
-      <p><a href="#jobs">Openings</a><br><a href="#about">About</a><br><a href="#apply">Apply</a></p>
+      <p><a href="#jobs">Openings</a><br><a href="#about">About</a><br><a href="#apply">Apply</a><br><a href="admin.html" class="staff-link">Staff login</a></p>
     </div>
   </div>
   <div class="footer-inner footer-warn">
@@ -366,89 +247,125 @@
 </footer>
 
 <script>
-  const jobs = [
-    {
-      dest: "Saudi Arabia",
-      code: "SAR",
-      tag: "MWO SK-2026-06-132",
-      title: "Nursing Specialist — Registered Nurse",
-      employer: "Hayat National Hospital Co.",
-      requirements: [
-        "10 slots — Female Registered Nurse (RN)",
-        "Minimum 2 years clinical experience",
-        "Data Flow / Mumaris registration required"
-      ],
-      salary: "SAR 5,000/mo + SAR 300 food allowance"
+  // ---- Supabase config ----
+  const SUPABASE_URL = "https://mxyxjslxseajyqjqcdxh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_uxkjmFJsOi1dXC90fIjGuQ_nO6X2L9L";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const categoryLabel = { domestic_helper: "Domestic Helper", skilled_worker: "Skilled Worker" };
+  const categoryTagClass = { domestic_helper: "tag-dh", skilled_worker: "tag-skilled" };
+
+  let allJobs = [];
+  let currentFilter = "all";
+
+  async function loadJobs(){
+    const grid = document.getElementById('jobsGrid');
+    const { data, error } = await sb
+      .from('jobs')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      grid.innerHTML = `<p class="empty-note">Could not load openings right now. Please refresh, or contact us directly.</p>`;
+      console.error(error);
+      return;
     }
-  ];
+    allJobs = data || [];
+    renderJobs();
+    populatePositionDropdown();
+  }
 
-  const grid = document.getElementById('jobsGrid');
-  const positionSelect = document.getElementById('fposition');
+  function renderJobs(){
+    const grid = document.getElementById('jobsGrid');
+    const jobs = currentFilter === 'all' ? allJobs : allJobs.filter(j => j.category === currentFilter);
 
-  jobs.forEach(job => {
-    const card = document.createElement('div');
-    card.className = 'job-card';
-    card.innerHTML = `
-      <div class="job-main">
-        <span class="job-tag">${job.tag}</span>
-        <h3>${job.title}</h3>
-        <div class="employer">${job.employer}</div>
-        <ul class="job-list">
-          ${job.requirements.map(r => `<li>${r}</li>`).join('')}
-        </ul>
-        <div class="job-salary">${job.salary}</div>
-        <div class="job-apply"><a href="#apply">Apply for this role →</a></div>
-      </div>
-      <div class="job-stub">
-        <div class="code">${job.code}</div>
-        <div class="dest">${job.dest}</div>
-        <div class="code">BOARDING</div>
-      </div>
-    `;
-    grid.appendChild(card);
+    if (jobs.length === 0){
+      grid.innerHTML = `<p class="empty-note">No open positions in this category right now. Check back soon.</p>`;
+      return;
+    }
 
-    const opt = document.createElement('option');
-    opt.value = job.title;
-    opt.textContent = job.title + ' — ' + job.dest;
-    positionSelect.appendChild(opt);
+    grid.innerHTML = jobs.map(job => {
+      const reqs = (job.requirements || '').split('\n').filter(Boolean);
+      return `
+        <div class="job-card">
+          <div class="job-main">
+            <span class="job-tag ${categoryTagClass[job.category] || 'tag-skilled'}">${categoryLabel[job.category] || job.category}</span>
+            ${job.mwo_code ? `<span class="job-tag tag-skilled">MWO ${job.mwo_code}</span>` : ''}
+            <h3>${job.title}</h3>
+            <div class="employer">${job.employer}</div>
+            <ul class="job-list">
+              ${job.slots ? `<li>${job.slots} slot${job.slots > 1 ? 's' : ''} available</li>` : ''}
+              ${reqs.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+            ${job.salary ? `<div class="job-salary">${job.salary}</div>` : ''}
+            <div class="job-apply"><a href="#apply" data-job-id="${job.id}" class="apply-link">Apply for this role →</a></div>
+          </div>
+          <div class="job-stub" style="background:${job.category === 'domestic_helper' ? 'var(--teal)' : 'var(--navy)'}">
+            <div class="code">${job.category === 'domestic_helper' ? 'DH' : 'SKW'}</div>
+            <div class="dest">${job.destination}</div>
+            <div class="code">BOARDING</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.apply-link').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('fposition').value = link.dataset.jobId;
+      });
+    });
+  }
+
+  function populatePositionDropdown(){
+    const select = document.getElementById('fposition');
+    select.innerHTML = '<option value="">— Select a position —</option>' +
+      allJobs.map(job => `<option value="${job.id}">${job.title} — ${job.destination}</option>`).join('') +
+      '<option value="other">Other / not listed above</option>';
+  }
+
+  document.getElementById('filterBar').addEventListener('click', (e) => {
+    if (!e.target.classList.contains('filter-btn')) return;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentFilter = e.target.dataset.filter;
+    renderJobs();
   });
 
-  const comingSoon = document.createElement('div');
-  comingSoon.className = 'job-card coming';
-  comingSoon.innerHTML = `<div class="job-main"><h3>More postings coming soon</h3></div>`;
-  grid.appendChild(comingSoon);
-
-  const otherOpt = document.createElement('option');
-  otherOpt.value = 'Other / not listed above';
-  positionSelect.appendChild(otherOpt);
-
-  document.getElementById('applyForm').addEventListener('submit', function(e){
+  document.getElementById('applyForm').addEventListener('submit', async function(e){
     e.preventDefault();
-    const name = document.getElementById('fname').value;
-    const contact = document.getElementById('fcontact').value;
-    const email = document.getElementById('femail').value;
-    const position = document.getElementById('fposition').value;
-    const exp = document.getElementById('fexp').value;
-    const message = document.getElementById('fmessage').value;
+    const statusEl = document.getElementById('formStatus');
+    const jobIdRaw = document.getElementById('fposition').value;
+    const job = allJobs.find(j => j.id === jobIdRaw);
 
-    const subject = encodeURIComponent(`Application: ${position}`);
-    const body = encodeURIComponent(
-`Name: ${name}
-Contact number: ${contact}
-Email: ${email}
-Position: ${position}
-Experience: ${exp}
+    const payload = {
+      job_id: job ? job.id : null,
+      job_title_snapshot: job ? job.title : 'Other / not listed',
+      full_name: document.getElementById('fname').value,
+      contact_number: document.getElementById('fcontact').value,
+      email: document.getElementById('femail').value,
+      experience: document.getElementById('fexp').value,
+      message: document.getElementById('fmessage').value
+    };
 
-Message:
-${message}
+    statusEl.textContent = 'Submitting…';
+    statusEl.style.color = 'var(--navy)';
 
-(Remember to attach your CV before sending this email.)`
-    );
+    const { error } = await sb.from('applications').insert(payload);
 
-    window.location.href = `mailto:recruitment@ferrandagency.com?subject=${subject}&body=${body}`;
-    document.getElementById('formStatus').textContent = 'Opening your email app — attach your CV there and hit send.';
-    document.getElementById('formStatus').style.color = '#9C3B32';
+    if (error){
+      statusEl.textContent = 'Something went wrong. Please try again or contact us via WhatsApp.';
+      statusEl.style.color = 'var(--stamp)';
+      console.error(error);
+      return;
+    }
+
+    statusEl.textContent = 'Application received! Our staff will reach out to you directly.';
+    statusEl.style.color = 'var(--teal)';
+    document.getElementById('applyForm').reset();
   });
+
+  loadJobs();
 </script>
 
 </body>
