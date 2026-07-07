@@ -3,384 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ferrand Human Resources International</title>
+<title>Staff Dashboard — Ferrand HR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --navy:#152238;
-    --navy-deep:#0B1424;
-    --cream:#F5EFE1;
-    --paper:#FBF7EC;
-    --stamp:#9C3B32;
-    --gold:#C9973C;
-    --teal:#3C6E62;
-    --ink:#232A33;
-    --line: rgba(21,34,56,0.18);
+    --navy:#152238; --navy-deep:#0B1424; --cream:#F5EFE1; --paper:#FBF7EC;
+    --stamp:#9C3B32; --gold:#C9973C; --teal:#3C6E62; --ink:#232A33; --line:rgba(21,34,56,0.15);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{font-family:'IBM Plex Sans', sans-serif; background:var(--paper); color:var(--ink); line-height:1.5;}
-  h1,h2,h3{font-family:'Fraunces', serif; font-weight:700; color:var(--navy);}
-  .mono{font-family:'IBM Plex Mono', monospace; letter-spacing:0.04em;}
-  a{color:inherit; text-decoration:none;}
+  body{font-family:'IBM Plex Sans', sans-serif; background:var(--paper); color:var(--ink); min-height:100vh;}
+  h1,h2{font-family:'Fraunces', serif; color:var(--navy);}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit;}
 
-  header{position:sticky; top:0; z-index:50; background:var(--navy); border-bottom:3px solid var(--gold);}
-  .nav-wrap{max-width:1100px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between;}
-  .brand{color:var(--cream);}
-  .brand .name{font-family:'Fraunces', serif; font-weight:700; font-size:1.3rem;}
-  .brand .tag{font-family:'IBM Plex Mono', monospace; font-size:0.62rem; color:var(--gold); letter-spacing:0.12em; text-transform:uppercase;}
-  nav{display:flex; gap:26px;}
-  nav a{color:var(--cream); font-size:0.9rem; font-weight:500; opacity:0.85;}
-  nav a:hover{opacity:1; color:var(--gold);}
-  @media (max-width:640px){ nav{gap:14px;} nav a{font-size:0.78rem;} }
-
-  .hero{background:var(--navy); color:var(--cream); position:relative; overflow:hidden; padding:64px 24px 80px;}
-  .hero::before{content:""; position:absolute; inset:0;
-    background-image:repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 64px),
-                      repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 64px);
-    pointer-events:none;}
-  .hero-inner{max-width:1100px; margin:0 auto; position:relative;}
-  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.14em; color:var(--gold); text-transform:uppercase; margin-bottom:16px;}
-  .hero h1{font-size:2.3rem; line-height:1.15; max-width:620px; color:var(--paper);}
-  .hero p{margin-top:16px; font-size:1rem; color:rgba(245,239,225,0.82); max-width:520px;}
-  .hero-ctas{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap;}
-  .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:2px; font-weight:600; font-size:0.88rem; border:1.5px solid transparent; cursor:pointer;}
-  .btn-primary{background:var(--gold); color:var(--navy-deep);}
-  .btn-ghost{border-color:rgba(245,239,225,0.4); color:var(--paper); background:transparent;}
-  .btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
-
-  .trust{background:var(--cream); border-bottom:1px solid var(--line); border-top:1px solid var(--line);}
-  .trust-inner{max-width:1100px; margin:0 auto; padding:12px 24px; display:flex; gap:28px; flex-wrap:wrap; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--navy);}
-  .trust-inner b{color:var(--stamp);}
-
-  section{padding:64px 24px;}
-  .section-inner{max-width:1100px; margin:0 auto;}
-  .section-head{margin-bottom:32px; max-width:600px;}
-  .section-head .eyebrow{color:var(--stamp);}
-  .section-head h2{font-size:1.8rem;}
-  .section-head p{margin-top:10px; color:#5a5f68;}
-
-  .filter-bar{display:flex; gap:10px; margin-bottom:32px; flex-wrap:wrap;}
-  .filter-btn{
-    font-family:'IBM Plex Mono', monospace; font-size:0.75rem; letter-spacing:0.05em; text-transform:uppercase;
-    padding:9px 16px; border:1.5px solid var(--navy); color:var(--navy); background:transparent; cursor:pointer; border-radius:2px;
-    transition:all 0.15s;
-  }
-  .filter-btn.active{background:var(--navy); color:var(--cream);}
-
-  .jobs-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;}
-  .job-card{background:var(--paper); border:1.5px solid var(--navy); display:flex; transition:transform 0.2s ease, box-shadow 0.2s ease;}
-  .job-card:hover{transform:translateY(-4px); box-shadow:0 14px 28px rgba(21,34,56,0.14);}
-  .job-main{flex:1; padding:24px 22px; min-width:0;}
-  .job-stub{width:92px; flex-shrink:0; color:var(--cream); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px 6px; text-align:center; border-left:2px dashed var(--gold); position:relative;}
-  .job-stub::before, .job-stub::after{content:""; position:absolute; width:16px; height:16px; background:var(--paper); border-radius:50%; left:-8px;}
-  .job-stub::before{top:-8px;} .job-stub::after{bottom:-8px;}
-  .job-stub .dest{font-family:'Fraunces', serif; font-weight:700; font-size:0.88rem;}
-  .job-stub .code{font-family:'IBM Plex Mono', monospace; font-size:0.6rem; letter-spacing:0.06em; color:var(--gold);}
-  .job-tag{display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; margin-bottom:10px; margin-right:6px;}
-  .tag-skilled{color:var(--stamp); border:1px solid var(--stamp);}
-  .tag-dh{color:var(--teal); border:1px solid var(--teal);}
-  .job-main h3{font-size:1.12rem; margin-bottom:3px;}
-  .job-main .employer{font-size:0.82rem; color:#6b7078; margin-bottom:12px;}
-  .job-list{list-style:none; font-size:0.85rem; display:flex; flex-direction:column; gap:5px; margin-bottom:14px;}
-  .job-list li{padding-left:15px; position:relative;}
-  .job-list li::before{content:"—"; position:absolute; left:0; color:var(--gold);}
-  .job-salary{font-family:'IBM Plex Mono', monospace; font-size:0.88rem; font-weight:600; color:var(--navy); background:var(--cream); display:inline-block; padding:5px 10px; border:1px dashed var(--line);}
-  .job-apply{margin-top:14px;}
-  .job-apply a{font-size:0.82rem; font-weight:600; color:var(--stamp); border-bottom:1.5px solid var(--stamp); padding-bottom:2px;}
-  .empty-note{color:#6b7078; font-size:0.9rem; padding:24px 0;}
-
-  .about{background:var(--navy); color:var(--cream);}
-  .about .section-head p{color:rgba(245,239,225,0.75);}
-  .about .section-head .eyebrow{color:var(--gold);}
-  .about-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;}
-  @media (max-width:760px){.about-grid{grid-template-columns:1fr;}}
-  .about-card{border-top:2px solid var(--gold); padding-top:14px;}
-  .about-card h4{font-family:'Fraunces', serif; font-size:1rem; color:var(--paper); margin-bottom:6px;}
-  .about-card p{font-size:0.87rem; color:rgba(245,239,225,0.7);}
-
-  .apply-wrap{background:var(--paper); border:1.5px solid var(--navy); padding:36px; display:grid; gap:18px; max-width:660px;}
-  .field{display:flex; flex-direction:column; gap:6px;}
-  .field label{font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--navy); font-family:'IBM Plex Mono', monospace;}
-  .field input, .field select, .field textarea{border:1.5px solid var(--line); background:var(--paper); padding:10px 12px; font-family:'IBM Plex Sans', sans-serif; font-size:0.92rem; color:var(--ink); border-radius:2px;}
+  /* LOGIN */
+  #loginScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:24px;}
+  .login-box{background:var(--paper); border:1.5px solid var(--gold); padding:40px; max-width:380px; width:100%;}
+  .login-box h1{font-size:1.4rem; margin-bottom:6px;}
+  .login-box .sub{font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--stamp); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:24px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field label{font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-family:'IBM Plex Mono', monospace; color:var(--navy);}
+  .field input, .field select, .field textarea{border:1.5px solid var(--line); padding:10px 12px; font-size:0.92rem; border-radius:2px; font-family:inherit;}
   .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--stamp);}
-  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
-  @media (max-width:520px){.row-2{grid-template-columns:1fr;}}
-  #formStatus{font-size:0.86rem; font-weight:600; margin-top:4px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; border-radius:2px; font-weight:600; font-size:0.88rem; border:1.5px solid transparent; cursor:pointer;}
+  .btn-primary{background:var(--gold); color:var(--navy-deep); width:100%;}
+  .btn-outline{border-color:var(--navy); color:var(--navy); background:transparent;}
+  .btn-header{border-color:var(--gold); color:var(--cream); background:transparent;}
+  .btn-header:hover{background:var(--gold); color:var(--navy-deep);}
+  .btn-danger{border-color:var(--stamp); color:var(--stamp); background:transparent;}
+  .btn-sm{padding:6px 12px; font-size:0.76rem;}
+  #loginError{color:var(--stamp); font-size:0.84rem; margin-top:10px; min-height:1.2em;}
 
-  footer{background:var(--navy-deep); color:rgba(245,239,225,0.7); padding:44px 24px 28px;}
-  .footer-inner{max-width:1100px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr; gap:28px;}
-  @media (max-width:700px){.footer-inner{grid-template-columns:1fr;}}
-  footer h5{color:var(--gold); font-family:'IBM Plex Mono', monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;}
-  footer p, footer a{font-size:0.83rem; line-height:1.7;}
-  .footer-warn{margin-top:28px; padding-top:18px; border-top:1px solid rgba(245,239,225,0.15); font-size:0.76rem; color:rgba(245,239,225,0.5); max-width:720px;}
-  .footer-warn b{color:var(--gold);}
-  .staff-link{font-size:0.68rem; opacity:0.4;}
+  /* DASHBOARD */
+  #dashboard{display:none;}
+  header{background:var(--navy); border-bottom:3px solid var(--gold); padding:16px 24px; display:flex; justify-content:space-between; align-items:center;}
+  header .name{color:var(--cream); font-family:'Fraunces', serif; font-weight:700; font-size:1.15rem;}
+  header .tag{color:var(--gold); font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase;}
+  #userEmail{color:rgba(245,239,225,0.7); font-size:0.8rem; margin-right:16px;}
+
+  .tabs{display:flex; gap:8px; padding:20px 24px 0; max-width:1100px; margin:0 auto;}
+  .tab-btn{font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.04em; text-transform:uppercase; padding:10px 18px; border:1.5px solid var(--navy); background:transparent; color:var(--navy); cursor:pointer; border-bottom:none;}
+  .tab-btn.active{background:var(--navy); color:var(--cream);}
+
+  main{max-width:1100px; margin:0 auto; padding:24px;}
+  .panel{display:none; border:1.5px solid var(--navy); background:var(--paper); padding:28px;}
+  .panel.active{display:block;}
+
+  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
+  .panel-head h2{font-size:1.3rem;}
+
+  table{width:100%; border-collapse:collapse; font-size:0.86rem;}
+  th{text-align:left; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); border-bottom:2px solid var(--navy); padding:8px 10px;}
+  td{padding:10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:hover td{background:var(--cream);}
+  .badge{font-family:'IBM Plex Mono', monospace; font-size:0.65rem; text-transform:uppercase; padding:3px 8px; border-radius:2px; display:inline-block;}
+  .badge-active{border:1px solid var(--teal); color:var(--teal);}
+  .badge-closed{border:1px solid #999; color:#999;}
+  .badge-new{border:1px solid var(--stamp); color:var(--stamp);}
+  .badge-contacted{border:1px solid var(--gold); color:var(--gold);}
+  .badge-hired{border:1px solid var(--teal); color:var(--teal);}
+  .badge-rejected{border:1px solid #999; color:#999;}
+  select.status-select{font-size:0.78rem; padding:4px 6px; border:1px solid var(--line);}
+
+  /* MODAL for add/edit job */
+  #jobModal{display:none; position:fixed; inset:0; background:rgba(11,20,36,0.6); align-items:center; justify-content:center; padding:20px; z-index:100;}
+  #jobModal .modal-box{background:var(--paper); border:1.5px solid var(--navy); padding:32px; max-width:520px; width:100%; max-height:90vh; overflow-y:auto;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:480px){.row-2{grid-template-columns:1fr;}}
+  .empty-note{color:#6b7078; font-size:0.9rem; padding:16px 0;}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="nav-wrap">
-    <div class="brand">
-      <div class="name">FERRAND <span style="color:var(--gold)">HR</span> International</div>
-      <div class="tag">Human Resources &amp; Overseas Placement</div>
-    </div>
-    <nav>
-      <a href="#jobs">Openings</a>
-      <a href="#about">About</a>
-      <a href="#apply">Apply</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </div>
-</header>
-
-<section class="hero">
-  <div class="hero-inner">
-    <div class="eyebrow">POEA / DMW Licensed Recruitment Agency</div>
-    <h1>Domestic Helper roles in HK &amp; Malaysia. Skilled Worker roles in Saudi. One trusted agency.</h1>
-    <p>Ferrand Human Resources International places qualified Filipino workers with verified employers overseas — properly licensed, properly documented, every step of the way.</p>
-    <div class="hero-ctas">
-      <a href="#jobs" class="btn btn-primary">View Open Positions</a>
-      <a href="#contact" class="btn btn-ghost">Verify Our License</a>
-    </div>
-  </div>
-</section>
-
-<div class="trust">
-  <div class="trust-inner">
-    <span>POEA License: <b>175-LB-112222-R</b></span>
-    <span>3rd Flr, Pacific Place Bldg., 539 Arquiza, Ermita, Manila</span>
-    <span>Hotline / WhatsApp: <b>+63 917-522-0114</b></span>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Staff Dashboard</h1>
+    <div class="sub">Ferrand HR International — Internal Use Only</div>
+    <form id="loginForm">
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" required></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPassword" required></div>
+      <button type="submit" class="btn btn-primary">Log in</button>
+      <div id="loginError"></div>
+    </form>
   </div>
 </div>
 
-<section id="jobs">
-  <div class="section-inner">
-    <div class="section-head">
-      <div class="eyebrow mono">Open Positions</div>
-      <h2>Current overseas openings</h2>
-      <p>Every listing is tied to a verified employer. Filter by the kind of work you're looking for.</p>
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div>
+      <div class="name">FERRAND <span style="color:var(--gold)">HR</span></div>
+      <div class="tag">Staff Dashboard</div>
     </div>
-    <div class="filter-bar" id="filterBar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="domestic_helper">Nonskilled (HK / Malaysia)</button>
-      <button class="filter-btn" data-filter="skilled_worker">Skilled (Saudi)</button>
+    <div>
+      <span id="userEmail"></span>
+      <button class="btn btn-header btn-sm" id="logoutBtn">Log out</button>
     </div>
-    <div class="jobs-grid" id="jobsGrid">
-      <p class="empty-note">Loading current openings…</p>
-    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="jobsPanel">Job Postings</button>
+    <button class="tab-btn" data-tab="appsPanel">Applications</button>
   </div>
-</section>
 
-<section class="about" id="about">
-  <div class="section-inner">
-    <div class="section-head">
-      <div class="eyebrow mono">About Ferrand</div>
-      <h2>Recruitment done by the book</h2>
-      <p>We exist to make overseas deployment safe, transparent, and properly documented — for the worker and the employer alike.</p>
-    </div>
-    <div class="about-grid">
-      <div class="about-card">
-        <h4>Licensed &amp; Accredited</h4>
-        <p>Operating under POEA/DMW License No. 175-LB-112222-R. Every job order carries its own MWO accreditation number, published alongside the listing.</p>
+  <main>
+    <!-- JOBS PANEL -->
+    <div class="panel active" id="jobsPanel">
+      <div class="panel-head">
+        <h2>Job Postings</h2>
+        <button class="btn btn-primary btn-sm" id="newJobBtn">+ Add job posting</button>
       </div>
-      <div class="about-card">
-        <h4>Two Placement Tracks</h4>
-        <p>Domestic Helper deployment to Hong Kong and Malaysia, and Skilled Worker deployment to Saudi Arabia — each with its own requirements and process.</p>
-      </div>
-      <div class="about-card">
-        <h4>Document Support</h4>
-        <p>From Data Flow/Mumaris registration to contract review, we walk applicants through each requirement before deployment.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="apply">
-  <div class="section-inner">
-    <div class="section-head">
-      <div class="eyebrow mono">Application</div>
-      <h2>Apply for a position</h2>
-      <p>Fill in your details below and submit — our staff will review it directly and reach out.</p>
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Destination</th><th>Slots</th><th>Interview</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="jobsTableBody"></tbody>
+      </table>
     </div>
 
-    <form class="apply-wrap" id="applyForm">
+    <!-- APPLICATIONS PANEL -->
+    <div class="panel" id="appsPanel">
+      <div class="panel-head"><h2>Applications</h2></div>
+      <table>
+        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>CV</th><th>Status</th></tr></thead>
+        <tbody id="appsTableBody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- JOB ADD/EDIT MODAL -->
+<div id="jobModal">
+  <div class="modal-box">
+    <h2 id="modalTitle" style="font-size:1.1rem; margin-bottom:18px;">Add job posting</h2>
+    <form id="jobForm">
+      <input type="hidden" id="jobId">
+      <div class="field"><label>Job title</label><input type="text" id="jTitle" required></div>
       <div class="row-2">
-        <div class="field"><label for="fname">Full name</label><input type="text" id="fname" required></div>
-        <div class="field"><label for="fcontact">Contact number</label><input type="tel" id="fcontact" required></div>
+        <div class="field"><label>Category</label>
+          <select id="jCategory" required>
+            <option value="domestic_helper">Nonskilled</option>
+            <option value="skilled_worker">Skilled</option>
+          </select>
+        </div>
+        <div class="field"><label>Destination</label><input type="text" id="jDestination" placeholder="e.g. Hong Kong" required></div>
       </div>
       <div class="row-2">
-        <div class="field"><label for="femail">Email address</label><input type="email" id="femail"></div>
-        <div class="field"><label for="fposition">Position applying for</label><select id="fposition" required></select></div>
+        <div class="field"><label>Slots</label><input type="number" id="jSlots" min="1"></div>
+        <div class="field"><label>MWO code (optional)</label><input type="text" id="jMwo"></div>
       </div>
-      <div class="field"><label for="fexp">Years of relevant experience</label><input type="text" id="fexp" placeholder="e.g. 3 years"></div>
-      <div class="field"><label for="fmessage">Message (optional)</label><textarea id="fmessage" rows="4" placeholder="Anything else we should know?"></textarea></div>
-      <div class="field"><label for="fcv">CV / Resume (optional)</label><input type="file" id="fcv" accept=".pdf,.doc,.docx"></div>
-      <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Submit application</button>
-      <div id="formStatus"></div>
+      <div class="field"><label>Interview date</label><input type="date" id="jInterviewDate"></div>
+      <div class="field"><label>Salary / pay</label><input type="text" id="jSalary" placeholder="e.g. SAR 5,000/mo + SAR 300 food"></div>
+      <div class="field"><label>Requirements (one per line)</label><textarea id="jRequirements" rows="4"></textarea></div>
+      <div class="field"><label>Status</label>
+        <select id="jStatus">
+          <option value="active">Active</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteJobBtn" style="display:none; margin-left:auto;">Delete</button>
+      </div>
     </form>
   </div>
-</section>
-
-<footer id="contact">
-  <div class="footer-inner">
-    <div>
-      <h5>Ferrand Human Resources International</h5>
-      <p>3rd Floor, Pacific Place Bldg.,<br>539 Arquiza, Ermita, Manila<br>POEA License: 175-LB-112222-R</p>
-    </div>
-    <div>
-      <h5>Reach us</h5>
-      <p><a href="tel:+639175220114">+63 917-522-0114</a><br>
-      <a href="https://wa.me/639175220114">WhatsApp</a><br>
-      <a href="mailto:recruitment@ferrandagency.com">recruitment@ferrandagency.com</a></p>
-    </div>
-    <div>
-      <h5>Navigate</h5>
-      <p><a href="#jobs">Openings</a><br><a href="#about">About</a><br><a href="#apply">Apply</a><br><a href="admin.html" class="staff-link">Staff login</a></p>
-    </div>
-  </div>
-  <div class="footer-inner footer-warn">
-    <p><b>Before you apply anywhere:</b> legitimate agencies never ask applicants to pay placement fees upfront. You can verify any agency's license directly on the DMW (formerly POEA) website. Be cautious of job offers that pressure you to pay, ship items, or move conversations off official channels immediately.</p>
-  </div>
-</footer>
+</div>
 
 <script>
-  // ---- Supabase config ----
   const SUPABASE_URL = "https://mxyxjslxseajyqjqcdxh.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_uxkjmFJsOi1dXC90fIjGuQ_nO6X2L9L";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const categoryLabel = { domestic_helper: "Nonskilled", skilled_worker: "Skilled" };
-  const categoryTagClass = { domestic_helper: "tag-dh", skilled_worker: "tag-skilled" };
+  const loginScreen = document.getElementById('loginScreen');
+  const dashboard = document.getElementById('dashboard');
 
-  let allJobs = [];
-  let currentFilter = "all";
-
-  async function loadJobs(){
-    const grid = document.getElementById('jobsGrid');
-    const { data, error } = await sb
-      .from('jobs')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      grid.innerHTML = `<p class="empty-note">Could not load openings right now. Please refresh, or contact us directly.</p>`;
-      console.error(error);
-      return;
+  // ---- AUTH ----
+  async function checkSession(){
+    const { data } = await sb.auth.getSession();
+    if (data.session){
+      showDashboard(data.session.user.email);
+    } else {
+      loginScreen.style.display = 'flex';
+      dashboard.style.display = 'none';
     }
-    allJobs = data || [];
-    renderJobs();
-    populatePositionDropdown();
   }
 
-  function renderJobs(){
-    const grid = document.getElementById('jobsGrid');
-    const jobs = currentFilter === 'all' ? allJobs : allJobs.filter(j => j.category === currentFilter);
+  function showDashboard(email){
+    loginScreen.style.display = 'none';
+    dashboard.style.display = 'block';
+    document.getElementById('userEmail').textContent = email;
+    loadJobs();
+    loadApplications();
+  }
 
-    if (jobs.length === 0){
-      grid.innerHTML = `<p class="empty-note">No open positions in this category right now. Check back soon.</p>`;
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    errorEl.textContent = '';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      errorEl.textContent = 'Incorrect email or password.';
       return;
     }
+    showDashboard(data.user.email);
+  });
 
-    grid.innerHTML = jobs.map(job => {
-      const reqs = (job.requirements || '').split('\n').filter(Boolean);
-      return `
-        <div class="job-card">
-          <div class="job-main">
-            <span class="job-tag ${categoryTagClass[job.category] || 'tag-skilled'}">${categoryLabel[job.category] || job.category}</span>
-            ${job.mwo_code ? `<span class="job-tag tag-skilled">MWO ${job.mwo_code}</span>` : ''}
-            <h3 style="margin-top:2px;">${job.title}</h3>
-            <ul class="job-list" style="margin-top:12px;">
-              ${job.slots ? `<li>${job.slots} slot${job.slots > 1 ? 's' : ''} available</li>` : ''}
-              ${job.interview_date ? `<li>Interview: ${new Date(job.interview_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</li>` : ''}
-              ${reqs.map(r => `<li>${r}</li>`).join('')}
-            </ul>
-            ${job.salary ? `<div class="job-salary">${job.salary}</div>` : ''}
-            <div class="job-apply"><a href="#apply" data-job-id="${job.id}" class="apply-link">Apply for this role →</a></div>
-          </div>
-          <div class="job-stub" style="background:${job.category === 'domestic_helper' ? 'var(--teal)' : 'var(--navy)'}">
-            <div class="code">${job.category === 'domestic_helper' ? 'DH' : 'SKW'}</div>
-            <div class="dest">${job.destination}</div>
-            <div class="code">BOARDING</div>
-          </div>
-        </div>
-      `;
-    }).join('');
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    checkSession();
+  });
 
-    grid.querySelectorAll('.apply-link').forEach(link => {
-      link.addEventListener('click', () => {
-        document.getElementById('fposition').value = link.dataset.jobId;
+  // ---- TABS ----
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---- JOBS ----
+  let jobsCache = [];
+  const categoryLabel = { domestic_helper: "Nonskilled", skilled_worker: "Skilled" };
+
+  async function loadJobs(){
+    const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('jobsTableBody');
+    if (error){ tbody.innerHTML = `<tr><td colspan="6" class="empty-note">Could not load jobs.</td></tr>`; return; }
+    jobsCache = data || [];
+    if (jobsCache.length === 0){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">No job postings yet.</td></tr>`; return; }
+
+    tbody.innerHTML = jobsCache.map(job => `
+      <tr>
+        <td><strong>${job.title}</strong></td>
+        <td>${categoryLabel[job.category] || job.category}</td>
+        <td>${job.destination}</td>
+        <td>${job.slots ?? '—'}</td>
+        <td>${job.interview_date ? new Date(job.interview_date).toLocaleDateString() : '—'}</td>
+        <td><span class="badge badge-${job.status}">${job.status}</span></td>
+        <td><button class="btn btn-outline btn-sm edit-job-btn" data-id="${job.id}">Edit</button></td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.edit-job-btn').forEach(btn => {
+      btn.addEventListener('click', () => openJobModal(btn.dataset.id));
+    });
+  }
+
+  function openJobModal(jobId){
+    const modal = document.getElementById('jobModal');
+    const deleteBtn = document.getElementById('deleteJobBtn');
+    document.getElementById('jobForm').reset();
+
+    if (jobId){
+      const job = jobsCache.find(j => j.id === jobId);
+      document.getElementById('modalTitle').textContent = 'Edit job posting';
+      document.getElementById('jobId').value = job.id;
+      document.getElementById('jTitle').value = job.title;
+      document.getElementById('jCategory').value = job.category;
+      document.getElementById('jDestination').value = job.destination;
+      document.getElementById('jSlots').value = job.slots || '';
+      document.getElementById('jMwo').value = job.mwo_code || '';
+      document.getElementById('jInterviewDate').value = job.interview_date || '';
+      document.getElementById('jSalary').value = job.salary || '';
+      document.getElementById('jRequirements').value = job.requirements || '';
+      document.getElementById('jStatus').value = job.status;
+      deleteBtn.style.display = 'inline-flex';
+    } else {
+      document.getElementById('modalTitle').textContent = 'Add job posting';
+      document.getElementById('jobId').value = '';
+      deleteBtn.style.display = 'none';
+    }
+    modal.style.display = 'flex';
+  }
+
+  document.getElementById('newJobBtn').addEventListener('click', () => openJobModal(null));
+  document.getElementById('cancelModalBtn').addEventListener('click', () => {
+    document.getElementById('jobModal').style.display = 'none';
+  });
+
+  document.getElementById('jobForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const jobId = document.getElementById('jobId').value;
+    const payload = {
+      title: document.getElementById('jTitle').value,
+      category: document.getElementById('jCategory').value,
+      destination: document.getElementById('jDestination').value,
+      slots: document.getElementById('jSlots').value ? parseInt(document.getElementById('jSlots').value) : null,
+      mwo_code: document.getElementById('jMwo').value || null,
+      interview_date: document.getElementById('jInterviewDate').value || null,
+      salary: document.getElementById('jSalary').value || null,
+      requirements: document.getElementById('jRequirements').value || null,
+      status: document.getElementById('jStatus').value
+    };
+
+    let error;
+    if (jobId){
+      ({ error } = await sb.from('jobs').update(payload).eq('id', jobId));
+    } else {
+      ({ error } = await sb.from('jobs').insert(payload));
+    }
+
+    if (error){ alert('Could not save job posting. ' + error.message); return; }
+    document.getElementById('jobModal').style.display = 'none';
+    loadJobs();
+  });
+
+  document.getElementById('deleteJobBtn').addEventListener('click', async () => {
+    const jobId = document.getElementById('jobId').value;
+    if (!confirm('Delete this job posting? This cannot be undone.')) return;
+    const { error } = await sb.from('jobs').delete().eq('id', jobId);
+    if (error){ alert('Could not delete job. ' + error.message); return; }
+    document.getElementById('jobModal').style.display = 'none';
+    loadJobs();
+  });
+
+  // ---- APPLICATIONS ----
+  async function loadApplications(){
+    const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('appsTableBody');
+    if (error){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">Could not load applications.</td></tr>`; return; }
+    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="8" class="empty-note">No applications yet.</td></tr>`; return; }
+
+    tbody.innerHTML = data.map(app => `
+      <tr>
+        <td class="mono" style="font-size:0.76rem;">${new Date(app.created_at).toLocaleDateString()}</td>
+        <td><strong>${app.full_name}</strong></td>
+        <td>${app.contact_number}${app.email ? '<br><span style="font-size:0.76rem; color:#888;">' + app.email + '</span>' : ''}</td>
+        <td>${app.job_title_snapshot || '—'}</td>
+        <td>${app.experience || '—'}</td>
+        <td style="max-width:220px;">${app.message || '—'}</td>
+        <td>${app.cv_path ? `<button class="btn btn-outline btn-sm view-cv-btn" data-path="${app.cv_path}">View CV</button>` : '—'}</td>
+        <td>
+          <select class="status-select" data-id="${app.id}">
+            <option value="new" ${app.status==='new'?'selected':''}>New</option>
+            <option value="contacted" ${app.status==='contacted'?'selected':''}>Contacted</option>
+            <option value="hired" ${app.status==='hired'?'selected':''}>Hired</option>
+            <option value="rejected" ${app.status==='rejected'?'selected':''}>Rejected</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.view-cv-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const { data: signed, error } = await sb.storage.from('cvs').createSignedUrl(btn.dataset.path, 60);
+        if (error || !signed){ alert('Could not open CV.'); return; }
+        window.open(signed.signedUrl, '_blank');
+      });
+    });
+
+    tbody.querySelectorAll('.status-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const { error } = await sb.from('applications').update({ status: sel.value }).eq('id', sel.dataset.id);
+        if (error) alert('Could not update status.');
       });
     });
   }
 
-  function populatePositionDropdown(){
-    const select = document.getElementById('fposition');
-    select.innerHTML = '<option value="">— Select a position —</option>' +
-      allJobs.map(job => `<option value="${job.id}">${job.title} — ${job.destination}</option>`).join('') +
-      '<option value="other">Other / not listed above</option>';
-  }
-
-  document.getElementById('filterBar').addEventListener('click', (e) => {
-    if (!e.target.classList.contains('filter-btn')) return;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    currentFilter = e.target.dataset.filter;
-    renderJobs();
-  });
-
-  document.getElementById('applyForm').addEventListener('submit', async function(e){
-    e.preventDefault();
-    const statusEl = document.getElementById('formStatus');
-    const jobIdRaw = document.getElementById('fposition').value;
-    const job = allJobs.find(j => j.id === jobIdRaw);
-
-    const payload = {
-      job_id: job ? job.id : null,
-      job_title_snapshot: job ? job.title : 'Other / not listed',
-      full_name: document.getElementById('fname').value,
-      contact_number: document.getElementById('fcontact').value,
-      email: document.getElementById('femail').value,
-      experience: document.getElementById('fexp').value,
-      message: document.getElementById('fmessage').value
-    };
-
-    statusEl.textContent = 'Submitting…';
-    statusEl.style.color = 'var(--navy)';
-
-    const cvFile = document.getElementById('fcv').files[0];
-    if (cvFile){
-      const safeName = cvFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-      const path = `${Date.now()}-${safeName}`;
-      const { error: uploadError } = await sb.storage.from('cvs').upload(path, cvFile);
-      if (uploadError){
-        statusEl.textContent = 'Could not upload CV. You can still submit without it, or try again.';
-        statusEl.style.color = 'var(--stamp)';
-        console.error(uploadError);
-        return;
-      }
-      payload.cv_path = path;
-    }
-
-    const { error } = await sb.from('applications').insert(payload);
-
-    if (error){
-      statusEl.textContent = 'Something went wrong. Please try again or contact us via WhatsApp.';
-      statusEl.style.color = 'var(--stamp)';
-      console.error(error);
-      return;
-    }
-
-    statusEl.textContent = 'Application received! Our staff will reach out to you directly.';
-    statusEl.style.color = 'var(--teal)';
-    document.getElementById('applyForm').reset();
-  });
-
-  loadJobs();
+  checkSession();
 </script>
 
 </body>
