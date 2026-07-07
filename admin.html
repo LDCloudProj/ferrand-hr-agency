@@ -126,7 +126,7 @@
     <div class="panel" id="appsPanel">
       <div class="panel-head"><h2>Applications</h2></div>
       <table>
-        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>CV</th><th>Passport</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>CV</th><th>Passport</th><th>Status</th><th>Files</th></tr></thead>
         <tbody id="appsTableBody"></tbody>
       </table>
     </div>
@@ -200,6 +200,25 @@
     document.getElementById('userEmail').textContent = email;
     loadJobs();
     loadApplications();
+    subscribeToRealtime();
+  }
+
+  let realtimeSubscribed = false;
+  function subscribeToRealtime(){
+    if (realtimeSubscribed) return;
+    realtimeSubscribed = true;
+
+    sb.channel('jobs-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => {
+        loadJobs();
+      })
+      .subscribe();
+
+    sb.channel('applications-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
+        loadApplications();
+      })
+      .subscribe();
   }
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -335,7 +354,7 @@
     const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('appsTableBody');
     if (error){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">Could not load applications.</td></tr>`; return; }
-    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="9" class="empty-note">No applications yet.</td></tr>`; return; }
+    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="10" class="empty-note">No applications yet.</td></tr>`; return; }
 
     tbody.innerHTML = data.map(app => `
       <tr>
@@ -355,6 +374,7 @@
             <option value="rejected" ${app.status==='rejected'?'selected':''}>Rejected</option>
           </select>
         </td>
+        <td>${(app.cv_path || app.passport_path) ? `<button class="btn btn-danger btn-sm delete-files-btn" data-id="${app.id}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete files</button>` : '—'}</td>
       </tr>
     `).join('');
 
@@ -371,6 +391,22 @@
         const { data: signed, error } = await sb.storage.from('passports').createSignedUrl(btn.dataset.path, 60);
         if (error || !signed){ alert('Could not open passport copy.'); return; }
         window.open(signed.signedUrl, '_blank');
+      });
+    });
+
+    tbody.querySelectorAll('.delete-files-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete the uploaded CV and passport copy for this applicant? This frees up storage space and cannot be undone.')) return;
+
+        if (btn.dataset.cv){
+          await sb.storage.from('cvs').remove([btn.dataset.cv]);
+        }
+        if (btn.dataset.passport){
+          await sb.storage.from('passports').remove([btn.dataset.passport]);
+        }
+        const { error } = await sb.from('applications').update({ cv_path: null, passport_path: null }).eq('id', btn.dataset.id);
+        if (error){ alert('Could not update record.'); return; }
+        loadApplications();
       });
     });
 
