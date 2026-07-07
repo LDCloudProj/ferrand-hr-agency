@@ -115,7 +115,7 @@
         <button class="btn btn-primary btn-sm" id="newJobBtn">+ Add job posting</button>
       </div>
       <table>
-        <thead><tr><th>Title</th><th>Category</th><th>Destination</th><th>Slots</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Title</th><th>Category</th><th>Destination</th><th>Slots</th><th>Interview</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="jobsTableBody"></tbody>
       </table>
     </div>
@@ -138,12 +138,11 @@
     <form id="jobForm">
       <input type="hidden" id="jobId">
       <div class="field"><label>Job title</label><input type="text" id="jTitle" required></div>
-      <div class="field"><label>Employer</label><input type="text" id="jEmployer" required></div>
       <div class="row-2">
         <div class="field"><label>Category</label>
           <select id="jCategory" required>
-            <option value="domestic_helper">Domestic Helper</option>
-            <option value="skilled_worker">Skilled Worker</option>
+            <option value="domestic_helper">Nonskilled</option>
+            <option value="skilled_worker">Skilled</option>
           </select>
         </div>
         <div class="field"><label>Destination</label><input type="text" id="jDestination" placeholder="e.g. Hong Kong" required></div>
@@ -152,6 +151,7 @@
         <div class="field"><label>Slots</label><input type="number" id="jSlots" min="1"></div>
         <div class="field"><label>MWO code (optional)</label><input type="text" id="jMwo"></div>
       </div>
+      <div class="field"><label>Interview date</label><input type="date" id="jInterviewDate"></div>
       <div class="field"><label>Salary / pay</label><input type="text" id="jSalary" placeholder="e.g. SAR 5,000/mo + SAR 300 food"></div>
       <div class="field"><label>Requirements (one per line)</label><textarea id="jRequirements" rows="4"></textarea></div>
       <div class="field"><label>Status</label>
@@ -228,21 +228,22 @@
 
   // ---- JOBS ----
   let jobsCache = [];
-  const categoryLabel = { domestic_helper: "Domestic Helper", skilled_worker: "Skilled Worker" };
+  const categoryLabel = { domestic_helper: "Nonskilled", skilled_worker: "Skilled" };
 
   async function loadJobs(){
     const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('jobsTableBody');
     if (error){ tbody.innerHTML = `<tr><td colspan="6" class="empty-note">Could not load jobs.</td></tr>`; return; }
     jobsCache = data || [];
-    if (jobsCache.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-note">No job postings yet.</td></tr>`; return; }
+    if (jobsCache.length === 0){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">No job postings yet.</td></tr>`; return; }
 
     tbody.innerHTML = jobsCache.map(job => `
       <tr>
-        <td><strong>${job.title}</strong><br><span class="mono" style="font-size:0.72rem; color:#888;">${job.employer}</span></td>
+        <td><strong>${job.title}</strong></td>
         <td>${categoryLabel[job.category] || job.category}</td>
         <td>${job.destination}</td>
         <td>${job.slots ?? '—'}</td>
+        <td>${job.interview_date ? new Date(job.interview_date).toLocaleDateString() : '—'}</td>
         <td><span class="badge badge-${job.status}">${job.status}</span></td>
         <td><button class="btn btn-outline btn-sm edit-job-btn" data-id="${job.id}">Edit</button></td>
       </tr>
@@ -263,11 +264,11 @@
       document.getElementById('modalTitle').textContent = 'Edit job posting';
       document.getElementById('jobId').value = job.id;
       document.getElementById('jTitle').value = job.title;
-      document.getElementById('jEmployer').value = job.employer;
       document.getElementById('jCategory').value = job.category;
       document.getElementById('jDestination').value = job.destination;
       document.getElementById('jSlots').value = job.slots || '';
       document.getElementById('jMwo').value = job.mwo_code || '';
+      document.getElementById('jInterviewDate').value = job.interview_date || '';
       document.getElementById('jSalary').value = job.salary || '';
       document.getElementById('jRequirements').value = job.requirements || '';
       document.getElementById('jStatus').value = job.status;
@@ -290,11 +291,11 @@
     const jobId = document.getElementById('jobId').value;
     const payload = {
       title: document.getElementById('jTitle').value,
-      employer: document.getElementById('jEmployer').value,
       category: document.getElementById('jCategory').value,
       destination: document.getElementById('jDestination').value,
       slots: document.getElementById('jSlots').value ? parseInt(document.getElementById('jSlots').value) : null,
       mwo_code: document.getElementById('jMwo').value || null,
+      interview_date: document.getElementById('jInterviewDate').value || null,
       salary: document.getElementById('jSalary').value || null,
       requirements: document.getElementById('jRequirements').value || null,
       status: document.getElementById('jStatus').value

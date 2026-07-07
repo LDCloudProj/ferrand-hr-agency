@@ -166,8 +166,8 @@
     </div>
     <div class="filter-bar" id="filterBar">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="domestic_helper">Domestic Helper (HK / Malaysia)</button>
-      <button class="filter-btn" data-filter="skilled_worker">Skilled Worker (Saudi)</button>
+      <button class="filter-btn" data-filter="domestic_helper">Nonskilled (HK / Malaysia)</button>
+      <button class="filter-btn" data-filter="skilled_worker">Skilled (Saudi)</button>
     </div>
     <div class="jobs-grid" id="jobsGrid">
       <p class="empty-note">Loading current openings…</p>
@@ -252,7 +252,7 @@
   const SUPABASE_ANON_KEY = "sb_publishable_uxkjmFJsOi1dXC90fIjGuQ_nO6X2L9L";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const categoryLabel = { domestic_helper: "Domestic Helper", skilled_worker: "Skilled Worker" };
+  const categoryLabel = { domestic_helper: "Nonskilled", skilled_worker: "Skilled" };
   const categoryTagClass = { domestic_helper: "tag-dh", skilled_worker: "tag-skilled" };
 
   let allJobs = [];
@@ -292,10 +292,10 @@
           <div class="job-main">
             <span class="job-tag ${categoryTagClass[job.category] || 'tag-skilled'}">${categoryLabel[job.category] || job.category}</span>
             ${job.mwo_code ? `<span class="job-tag tag-skilled">MWO ${job.mwo_code}</span>` : ''}
-            <h3>${job.title}</h3>
-            <div class="employer">${job.employer}</div>
-            <ul class="job-list">
+            <h3 style="margin-top:2px;">${job.title}</h3>
+            <ul class="job-list" style="margin-top:12px;">
               ${job.slots ? `<li>${job.slots} slot${job.slots > 1 ? 's' : ''} available</li>` : ''}
+              ${job.interview_date ? `<li>Interview: ${new Date(job.interview_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</li>` : ''}
               ${reqs.map(r => `<li>${r}</li>`).join('')}
             </ul>
             ${job.salary ? `<div class="job-salary">${job.salary}</div>` : ''}
