@@ -30,6 +30,8 @@
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; border-radius:2px; font-weight:600; font-size:0.88rem; border:1.5px solid transparent; cursor:pointer;}
   .btn-primary{background:var(--gold); color:var(--navy-deep); width:100%;}
   .btn-outline{border-color:var(--navy); color:var(--navy); background:transparent;}
+  .btn-header{border-color:var(--gold); color:var(--cream); background:transparent;}
+  .btn-header:hover{background:var(--gold); color:var(--navy-deep);}
   .btn-danger{border-color:var(--stamp); color:var(--stamp); background:transparent;}
   .btn-sm{padding:6px 12px; font-size:0.76rem;}
   #loginError{color:var(--stamp); font-size:0.84rem; margin-top:10px; min-height:1.2em;}
@@ -98,7 +100,7 @@
     </div>
     <div>
       <span id="userEmail"></span>
-      <button class="btn btn-outline btn-sm" id="logoutBtn">Log out</button>
+      <button class="btn btn-header btn-sm" id="logoutBtn">Log out</button>
     </div>
   </header>
 
