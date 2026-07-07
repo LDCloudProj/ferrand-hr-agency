@@ -107,6 +107,7 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="jobsPanel">Job Postings</button>
     <button class="tab-btn" data-tab="appsPanel">Applications</button>
+    <button class="tab-btn" data-tab="updatesPanel">Deployment Updates</button>
   </div>
 
   <main>
@@ -130,7 +131,43 @@
         <tbody id="appsTableBody"></tbody>
       </table>
     </div>
+
+    <!-- DEPLOYMENT UPDATES PANEL -->
+    <div class="panel" id="updatesPanel">
+      <div class="panel-head">
+        <h2>Deployment Updates</h2>
+        <button class="btn btn-primary btn-sm" id="newUpdateBtn">+ Add update</button>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Title</th><th>Photos</th><th>Actions</th></tr></thead>
+        <tbody id="updatesTableBody"></tbody>
+      </table>
+    </div>
   </main>
+</div>
+
+<!-- UPDATE ADD/EDIT MODAL -->
+<div id="updateModal" style="display:none; position:fixed; inset:0; background:rgba(11,20,36,0.6); align-items:center; justify-content:center; padding:20px; z-index:100;">
+  <div class="modal-box" style="background:var(--paper); border:1.5px solid var(--navy); padding:32px; max-width:480px; width:100%;">
+    <h2 id="updateModalTitle" style="font-size:1.1rem; margin-bottom:18px;">Add update</h2>
+    <form id="updateForm">
+      <input type="hidden" id="updateId">
+      <div class="field"><label>Title</label><input type="text" id="updateTitle" placeholder="e.g. New partner: Al Rajhi Hospital" required></div>
+      <div class="field"><label>Date</label><input type="date" id="updateDate" required></div>
+      <div class="field"><label>Details</label><textarea id="updateDescription" rows="4" placeholder="Full description of the update" required></textarea></div>
+      <div class="field">
+        <label>Photos</label>
+        <div id="photoPreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;"></div>
+        <input type="file" id="updatePhotos" accept="image/*" multiple>
+        <div class="form-note" id="photoUploadStatus" style="font-size:0.78rem; color:#6b7078;"></div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" id="cancelUpdateModalBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteUpdateBtn" style="display:none; margin-left:auto;">Delete</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- JOB ADD/EDIT MODAL -->
@@ -210,6 +247,7 @@
     document.getElementById('userEmail').textContent = email;
     loadJobs();
     loadApplications();
+    loadUpdates();
     subscribeToRealtime();
   }
 
@@ -227,6 +265,12 @@
     sb.channel('applications-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
         loadApplications();
+      })
+      .subscribe();
+
+    sb.channel('updates-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'deployment_updates' }, () => {
+        loadUpdates();
       })
       .subscribe();
   }
@@ -446,6 +490,138 @@
       });
     });
   }
+
+  // ---- DEPLOYMENT UPDATES ----
+  let updatesCache = [];
+
+  async function loadUpdates(){
+    const { data, error } = await sb.from('deployment_updates').select('*').order('update_date', { ascending: false });
+    const tbody = document.getElementById('updatesTableBody');
+    if (error){ tbody.innerHTML = `<tr><td colspan="3" class="empty-note">Could not load updates.</td></tr>`; return; }
+    updatesCache = data || [];
+    if (updatesCache.length === 0){ tbody.innerHTML = `<tr><td colspan="4" class="empty-note">No updates yet.</td></tr>`; return; }
+
+    tbody.innerHTML = updatesCache.map(u => `
+      <tr>
+        <td class="mono" style="font-size:0.76rem;">${new Date(u.update_date).toLocaleDateString()}</td>
+        <td><strong>${u.title || '—'}</strong></td>
+        <td>${(u.photo_paths || []).length}</td>
+        <td><button class="btn btn-outline btn-sm edit-update-btn" data-id="${u.id}">Edit</button></td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.edit-update-btn').forEach(btn => {
+      btn.addEventListener('click', () => openUpdateModal(btn.dataset.id));
+    });
+  }
+
+  function openUpdateModal(updateId){
+    const modal = document.getElementById('updateModal');
+    const deleteBtn = document.getElementById('deleteUpdateBtn');
+    document.getElementById('updateForm').reset();
+    document.getElementById('photoUploadStatus').textContent = '';
+
+    if (updateId){
+      const u = updatesCache.find(x => x.id === updateId);
+      document.getElementById('updateModalTitle').textContent = 'Edit update';
+      document.getElementById('updateId').value = u.id;
+      document.getElementById('updateTitle').value = u.title || '';
+      document.getElementById('updateDate').value = u.update_date;
+      document.getElementById('updateDescription').value = u.description;
+      currentPhotoPaths = [...(u.photo_paths || [])];
+      deleteBtn.style.display = 'inline-flex';
+    } else {
+      document.getElementById('updateModalTitle').textContent = 'Add update';
+      document.getElementById('updateId').value = '';
+      currentPhotoPaths = [];
+      deleteBtn.style.display = 'none';
+    }
+    renderPhotoPreview();
+    modal.style.display = 'flex';
+  }
+
+  let currentPhotoPaths = [];
+
+  function renderPhotoPreview(){
+    const preview = document.getElementById('photoPreview');
+    if (currentPhotoPaths.length === 0){ preview.innerHTML = ''; return; }
+    preview.innerHTML = currentPhotoPaths.map((path, i) => {
+      const url = sb.storage.from('deployment-photos').getPublicUrl(path).data.publicUrl;
+      return `
+        <div style="position:relative;">
+          <img src="${url}" style="width:64px; height:64px; object-fit:cover; border:1.5px solid var(--navy);">
+          <button type="button" class="remove-photo-btn" data-index="${i}" style="position:absolute; top:-6px; right:-6px; background:var(--stamp); color:white; border:none; width:18px; height:18px; border-radius:50%; font-size:11px; cursor:pointer; line-height:1;">×</button>
+        </div>
+      `;
+    }).join('');
+
+    preview.querySelectorAll('.remove-photo-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.index);
+        const path = currentPhotoPaths[idx];
+        await sb.storage.from('deployment-photos').remove([path]);
+        currentPhotoPaths.splice(idx, 1);
+        renderPhotoPreview();
+      });
+    });
+  }
+
+  document.getElementById('updatePhotos').addEventListener('change', async function(){
+    const files = Array.from(this.files);
+    if (files.length === 0) return;
+    document.getElementById('photoUploadStatus').textContent = 'Uploading…';
+
+    for (const file of files){
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const path = `${Date.now()}-${safeName}`;
+      const { error } = await sb.storage.from('deployment-photos').upload(path, file);
+      if (!error){
+        currentPhotoPaths.push(path);
+      }
+    }
+    this.value = '';
+    document.getElementById('photoUploadStatus').textContent = '';
+    renderPhotoPreview();
+  });
+
+  document.getElementById('newUpdateBtn').addEventListener('click', () => openUpdateModal(null));
+  document.getElementById('cancelUpdateModalBtn').addEventListener('click', () => {
+    document.getElementById('updateModal').style.display = 'none';
+  });
+
+  document.getElementById('updateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const updateId = document.getElementById('updateId').value;
+    const payload = {
+      title: document.getElementById('updateTitle').value,
+      update_date: document.getElementById('updateDate').value,
+      description: document.getElementById('updateDescription').value,
+      photo_paths: currentPhotoPaths
+    };
+
+    let error;
+    if (updateId){
+      ({ error } = await sb.from('deployment_updates').update(payload).eq('id', updateId));
+    } else {
+      ({ error } = await sb.from('deployment_updates').insert(payload));
+    }
+
+    if (error){ alert('Could not save update. ' + error.message); return; }
+    document.getElementById('updateModal').style.display = 'none';
+    loadUpdates();
+  });
+
+  document.getElementById('deleteUpdateBtn').addEventListener('click', async () => {
+    const updateId = document.getElementById('updateId').value;
+    if (!confirm('Delete this update? Its photos will also be removed.')) return;
+    if (currentPhotoPaths.length > 0){
+      await sb.storage.from('deployment-photos').remove(currentPhotoPaths);
+    }
+    const { error } = await sb.from('deployment_updates').delete().eq('id', updateId);
+    if (error){ alert('Could not delete update.'); return; }
+    document.getElementById('updateModal').style.display = 'none';
+    loadUpdates();
+  });
 
   checkSession();
 </script>
