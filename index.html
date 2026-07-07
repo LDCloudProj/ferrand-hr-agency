@@ -297,6 +297,7 @@
             ${job.nonstop_hiring ? `<span class="job-tag tag-nonstop">Nonstop Hiring</span>` : ''}
             ${job.mwo_code ? `<span class="job-tag tag-skilled">MWO ${job.mwo_code}</span>` : ''}
             <h3 style="margin-top:2px;">${job.title}</h3>
+            ${job.employer ? `<div class="employer" style="font-size:0.82rem; color:#6b7078; margin-bottom:8px;">${job.employer}</div>` : ''}
             <ul class="job-list" style="margin-top:12px;">
               ${job.slots ? `<li>${job.slots} slot${job.slots > 1 ? 's' : ''} available</li>` : ''}
               ${job.interview_date ? `<li>Interview: ${new Date(job.interview_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</li>` : ''}
