@@ -82,6 +82,7 @@
   .job-tag{display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; margin-bottom:10px; margin-right:6px;}
   .tag-skilled{color:var(--stamp); border:1px solid var(--stamp);}
   .tag-dh{color:var(--teal); border:1px solid var(--teal);}
+  .tag-nonstop{color:var(--navy-deep); background:var(--gold); border:1px solid var(--gold); font-weight:700;}
   .job-main h3{font-size:1.12rem; margin-bottom:3px;}
   .job-main .employer{font-size:0.82rem; color:#6b7078; margin-bottom:12px;}
   .job-list{list-style:none; font-size:0.85rem; display:flex; flex-direction:column; gap:5px; margin-bottom:14px;}
@@ -219,6 +220,7 @@
       <div class="field"><label for="fexp">Years of relevant experience</label><input type="text" id="fexp" placeholder="e.g. 3 years"></div>
       <div class="field"><label for="fmessage">Message (optional)</label><textarea id="fmessage" rows="4" placeholder="Anything else we should know?"></textarea></div>
       <div class="field"><label for="fcv">CV / Resume (optional)</label><input type="file" id="fcv" accept=".pdf,.doc,.docx"></div>
+      <div class="field"><label for="fpassport">Passport copy (required) *</label><input type="file" id="fpassport" accept=".pdf,.jpg,.jpeg,.png" required></div>
       <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Submit application</button>
       <div id="formStatus"></div>
     </form>
@@ -292,6 +294,7 @@
         <div class="job-card">
           <div class="job-main">
             <span class="job-tag ${categoryTagClass[job.category] || 'tag-skilled'}">${categoryLabel[job.category] || job.category}</span>
+            ${job.nonstop_hiring ? `<span class="job-tag tag-nonstop">Nonstop Hiring</span>` : ''}
             ${job.mwo_code ? `<span class="job-tag tag-skilled">MWO ${job.mwo_code}</span>` : ''}
             <h3 style="margin-top:2px;">${job.title}</h3>
             <ul class="job-list" style="margin-top:12px;">
@@ -339,6 +342,13 @@
     const jobIdRaw = document.getElementById('fposition').value;
     const job = allJobs.find(j => j.id === jobIdRaw);
 
+    const passportFile = document.getElementById('fpassport').files[0];
+    if (!passportFile){
+      statusEl.textContent = 'A passport copy is required before you can submit.';
+      statusEl.style.color = 'var(--stamp)';
+      return;
+    }
+
     const payload = {
       job_id: job ? job.id : null,
       job_title_snapshot: job ? job.title : 'Other / not listed',
@@ -365,6 +375,17 @@
       }
       payload.cv_path = path;
     }
+
+    const safePassportName = passportFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const passportPath = `${Date.now()}-${safePassportName}`;
+    const { error: passportUploadError } = await sb.storage.from('passports').upload(passportPath, passportFile);
+    if (passportUploadError){
+      statusEl.textContent = 'Could not upload passport copy. Please try again.';
+      statusEl.style.color = 'var(--stamp)';
+      console.error(passportUploadError);
+      return;
+    }
+    payload.passport_path = passportPath;
 
     const { error } = await sb.from('applications').insert(payload);
 
