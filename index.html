@@ -218,6 +218,7 @@
       </div>
       <div class="field"><label for="fexp">Years of relevant experience</label><input type="text" id="fexp" placeholder="e.g. 3 years"></div>
       <div class="field"><label for="fmessage">Message (optional)</label><textarea id="fmessage" rows="4" placeholder="Anything else we should know?"></textarea></div>
+      <div class="field"><label for="fcv">CV / Resume (optional)</label><input type="file" id="fcv" accept=".pdf,.doc,.docx"></div>
       <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Submit application</button>
       <div id="formStatus"></div>
     </form>
@@ -350,6 +351,20 @@
 
     statusEl.textContent = 'Submitting…';
     statusEl.style.color = 'var(--navy)';
+
+    const cvFile = document.getElementById('fcv').files[0];
+    if (cvFile){
+      const safeName = cvFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const path = `${Date.now()}-${safeName}`;
+      const { error: uploadError } = await sb.storage.from('cvs').upload(path, cvFile);
+      if (uploadError){
+        statusEl.textContent = 'Could not upload CV. You can still submit without it, or try again.';
+        statusEl.style.color = 'var(--stamp)';
+        console.error(uploadError);
+        return;
+      }
+      payload.cv_path = path;
+    }
 
     const { error } = await sb.from('applications').insert(payload);
 
