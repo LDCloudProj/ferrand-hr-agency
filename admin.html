@@ -104,6 +104,17 @@
     </div>
   </header>
 
+  <div id="nameModal" style="display:none; position:fixed; inset:0; background:rgba(11,20,36,0.6); align-items:center; justify-content:center; padding:20px; z-index:150;">
+    <div class="modal-box" style="background:var(--paper); border:1.5px solid var(--gold); padding:32px; max-width:380px; width:100%;">
+      <h2 style="font-size:1.1rem; margin-bottom:8px;">What's your name?</h2>
+      <p style="font-size:0.85rem; color:#6b7078; margin-bottom:16px;">This shows up on job posts and updates you create, so the team knows who did what.</p>
+      <form id="nameForm">
+        <div class="field"><label>Your name</label><input type="text" id="staffNameInput" placeholder="e.g. Lance" required></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Save</button>
+      </form>
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab-btn active" data-tab="jobsPanel">Job Postings</button>
     <button class="tab-btn" data-tab="appsPanel">Applications</button>
@@ -118,7 +129,7 @@
         <button class="btn btn-primary btn-sm" id="newJobBtn">+ Add job posting</button>
       </div>
       <table>
-        <thead><tr><th>Title</th><th>Category</th><th>Destination</th><th>Slots</th><th>Interview</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Title</th><th>Category</th><th>Destination</th><th>Slots</th><th>Interview</th><th>Status</th><th>Created by</th><th>Actions</th></tr></thead>
         <tbody id="jobsTableBody"></tbody>
       </table>
     </div>
@@ -127,7 +138,7 @@
     <div class="panel" id="appsPanel">
       <div class="panel-head"><h2>Applications</h2></div>
       <table>
-        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>CV</th><th>Passport</th><th>Status</th><th>Files</th></tr></thead>
+        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>CV</th><th>Passport</th><th>Status</th><th>Status by</th><th>Files</th></tr></thead>
         <tbody id="appsTableBody"></tbody>
       </table>
     </div>
@@ -139,7 +150,7 @@
         <button class="btn btn-primary btn-sm" id="newUpdateBtn">+ Add update</button>
       </div>
       <table>
-        <thead><tr><th>Date</th><th>Title</th><th>Photos</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Date</th><th>Title</th><th>Photos</th><th>By</th><th>Actions</th></tr></thead>
         <tbody id="updatesTableBody"></tbody>
       </table>
     </div>
@@ -231,25 +242,63 @@
   const dashboard = document.getElementById('dashboard');
 
   // ---- AUTH ----
+  let currentUserId = null;
+  let staffProfiles = {};
+
+  async function loadStaffProfiles(){
+    const { data } = await sb.from('staff_profiles').select('*');
+    staffProfiles = {};
+    (data || []).forEach(p => { staffProfiles[p.user_id] = p.display_name; });
+  }
+
+  function nameOf(userId){
+    if (!userId) return '—';
+    return staffProfiles[userId] || 'Staff';
+  }
+
   async function checkSession(){
     const { data } = await sb.auth.getSession();
     if (data.session){
-      showDashboard(data.session.user.email);
+      showDashboard(data.session.user);
     } else {
       loginScreen.style.display = 'flex';
       dashboard.style.display = 'none';
     }
   }
 
-  function showDashboard(email){
+  async function showDashboard(user){
+    currentUserId = user.id;
     loginScreen.style.display = 'none';
     dashboard.style.display = 'block';
-    document.getElementById('userEmail').textContent = email;
+
+    await loadStaffProfiles();
+
+    if (!staffProfiles[currentUserId]){
+      document.getElementById('nameModal').style.display = 'flex';
+      document.getElementById('userEmail').textContent = user.email;
+    } else {
+      document.getElementById('userEmail').textContent = `Hi ${staffProfiles[currentUserId]}!`;
+    }
+
     loadJobs();
     loadApplications();
     loadUpdates();
     subscribeToRealtime();
   }
+
+  document.getElementById('nameForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('staffNameInput').value.trim();
+    if (!name) return;
+    const { error } = await sb.from('staff_profiles').upsert({ user_id: currentUserId, display_name: name });
+    if (error){ alert('Could not save name. ' + error.message); return; }
+    staffProfiles[currentUserId] = name;
+    document.getElementById('userEmail').textContent = `Hi ${name}!`;
+    document.getElementById('nameModal').style.display = 'none';
+    loadJobs();
+    loadApplications();
+    loadUpdates();
+  });
 
   let realtimeSubscribed = false;
   function subscribeToRealtime(){
@@ -287,7 +336,7 @@
       errorEl.textContent = 'Incorrect email or password.';
       return;
     }
-    showDashboard(data.user.email);
+    showDashboard(data.user);
   });
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -312,9 +361,9 @@
   async function loadJobs(){
     const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('jobsTableBody');
-    if (error){ tbody.innerHTML = `<tr><td colspan="6" class="empty-note">Could not load jobs.</td></tr>`; return; }
+    if (error){ tbody.innerHTML = `<tr><td colspan="8" class="empty-note">Could not load jobs.</td></tr>`; return; }
     jobsCache = data || [];
-    if (jobsCache.length === 0){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">No job postings yet.</td></tr>`; return; }
+    if (jobsCache.length === 0){ tbody.innerHTML = `<tr><td colspan="8" class="empty-note">No job postings yet.</td></tr>`; return; }
 
     tbody.innerHTML = jobsCache.map(job => `
       <tr>
@@ -324,6 +373,7 @@
         <td>${job.slots ?? '—'}</td>
         <td>${job.interview_date ? new Date(job.interview_date).toLocaleDateString() : '—'}</td>
         <td><span class="badge badge-${job.status}">${job.status}</span></td>
+        <td style="font-size:0.82rem;">${nameOf(job.created_by)}</td>
         <td><button class="btn btn-outline btn-sm edit-job-btn" data-id="${job.id}">Edit</button></td>
       </tr>
     `).join('');
@@ -403,8 +453,11 @@
 
     let error;
     if (jobId){
+      payload.updated_by = currentUserId;
       ({ error } = await sb.from('jobs').update(payload).eq('id', jobId));
     } else {
+      payload.created_by = currentUserId;
+      payload.updated_by = currentUserId;
       ({ error } = await sb.from('jobs').insert(payload));
     }
 
@@ -426,8 +479,8 @@
   async function loadApplications(){
     const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('appsTableBody');
-    if (error){ tbody.innerHTML = `<tr><td colspan="7" class="empty-note">Could not load applications.</td></tr>`; return; }
-    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="10" class="empty-note">No applications yet.</td></tr>`; return; }
+    if (error){ tbody.innerHTML = `<tr><td colspan="11" class="empty-note">Could not load applications.</td></tr>`; return; }
+    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="11" class="empty-note">No applications yet.</td></tr>`; return; }
 
     tbody.innerHTML = data.map(app => `
       <tr>
@@ -447,6 +500,7 @@
             <option value="rejected" ${app.status==='rejected'?'selected':''}>Rejected</option>
           </select>
         </td>
+        <td style="font-size:0.82rem;">${app.status_updated_by ? nameOf(app.status_updated_by) : '—'}</td>
         <td>${(app.cv_path || app.passport_path) ? `<button class="btn btn-danger btn-sm delete-files-btn" data-id="${app.id}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete files</button>` : '—'}</td>
       </tr>
     `).join('');
@@ -485,7 +539,7 @@
 
     tbody.querySelectorAll('.status-select').forEach(sel => {
       sel.addEventListener('change', async () => {
-        const { error } = await sb.from('applications').update({ status: sel.value }).eq('id', sel.dataset.id);
+        const { error } = await sb.from('applications').update({ status: sel.value, status_updated_by: currentUserId, status_updated_at: new Date().toISOString() }).eq('id', sel.dataset.id);
         if (error) alert('Could not update status.');
       });
     });
@@ -497,15 +551,16 @@
   async function loadUpdates(){
     const { data, error } = await sb.from('deployment_updates').select('*').order('update_date', { ascending: false });
     const tbody = document.getElementById('updatesTableBody');
-    if (error){ tbody.innerHTML = `<tr><td colspan="3" class="empty-note">Could not load updates.</td></tr>`; return; }
+    if (error){ tbody.innerHTML = `<tr><td colspan="5" class="empty-note">Could not load updates.</td></tr>`; return; }
     updatesCache = data || [];
-    if (updatesCache.length === 0){ tbody.innerHTML = `<tr><td colspan="4" class="empty-note">No updates yet.</td></tr>`; return; }
+    if (updatesCache.length === 0){ tbody.innerHTML = `<tr><td colspan="5" class="empty-note">No updates yet.</td></tr>`; return; }
 
     tbody.innerHTML = updatesCache.map(u => `
       <tr>
         <td class="mono" style="font-size:0.76rem;">${new Date(u.update_date).toLocaleDateString()}</td>
         <td><strong>${u.title || '—'}</strong></td>
         <td>${(u.photo_paths || []).length}</td>
+        <td style="font-size:0.82rem;">${nameOf(u.created_by)}</td>
         <td><button class="btn btn-outline btn-sm edit-update-btn" data-id="${u.id}">Edit</button></td>
       </tr>
     `).join('');
@@ -601,8 +656,11 @@
 
     let error;
     if (updateId){
+      payload.updated_by = currentUserId;
       ({ error } = await sb.from('deployment_updates').update(payload).eq('id', updateId));
     } else {
+      payload.created_by = currentUserId;
+      payload.updated_by = currentUserId;
       ({ error } = await sb.from('deployment_updates').insert(payload));
     }
 
