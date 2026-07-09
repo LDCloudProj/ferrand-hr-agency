@@ -209,6 +209,8 @@
             <option value="">— Select —</option>
             <option value="Hong Kong">Hong Kong</option>
             <option value="Malaysia">Malaysia</option>
+            <option value="Singapore">Singapore</option>
+            <option value="Dubai/UAE">Dubai/UAE</option>
             <option value="Saudi Arabia">Saudi Arabia</option>
             <option value="other">Other (type below)</option>
           </select>
@@ -422,7 +424,7 @@
       document.getElementById('jTitle').value = job.title;
       document.getElementById('jEmployer').value = job.employer || '';
       document.getElementById('jCategory').value = job.category;
-      const knownDestinations = ['Hong Kong', 'Malaysia', 'Saudi Arabia'];
+      const knownDestinations = ['Hong Kong', 'Malaysia', 'Singapore', 'Dubai/UAE', 'Saudi Arabia'];
       if (knownDestinations.includes(job.destination)){
         document.getElementById('jDestination').value = job.destination;
         document.getElementById('jDestinationOther').style.display = 'none';

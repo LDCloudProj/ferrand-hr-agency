@@ -44,8 +44,8 @@
     pointer-events:none;}
   .hero-inner{max-width:1100px; margin:0 auto; position:relative;}
   .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.14em; color:var(--gold); text-transform:uppercase; margin-bottom:16px;}
-  .hero h1{font-size:2.3rem; line-height:1.15; max-width:620px; color:var(--paper);}
-  .hero p{margin-top:16px; font-size:1rem; color:rgba(245,239,225,0.82); max-width:520px;}
+  .hero h1{font-size:2.5rem; line-height:1.2; max-width:640px; color:var(--paper);}
+  .hero-detail{display:block; font-family:'IBM Plex Sans', sans-serif; font-weight:400; font-size:1rem; line-height:1.6; color:rgba(245,239,225,0.78); margin-top:18px; max-width:520px;}
   .hero-ctas{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap;}
   .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:2px; font-weight:600; font-size:0.88rem; border:1.5px solid transparent; cursor:pointer;}
   .btn-primary{background:var(--gold); color:var(--navy-deep);}
@@ -154,8 +154,7 @@
 <section class="hero">
   <div class="hero-inner">
     <div class="eyebrow">POEA / DMW Licensed Recruitment Agency</div>
-    <h1>Domestic Helper roles in HK &amp; Malaysia. Skilled Worker roles in Saudi. One trusted agency.</h1>
-    <p>Ferrand Human Resources International places qualified Filipino workers with verified employers overseas — properly licensed, properly documented, every step of the way.</p>
+    <h1><span style="color:var(--gold);">FERRAND</span> — your avenue to express your skills as a Professional, Skilled, or Semi-Skilled Worker, or as a Domestic Helper.<span class="hero-detail">Now hiring for deployment to Hong Kong, Singapore, Malaysia, Dubai/UAE, and Saudi Arabia — properly licensed and documented every step of the way.</span></h1>
     <div class="hero-ctas">
       <a href="#jobs" class="btn btn-primary">View Open Positions</a>
       <a href="#contact" class="btn btn-ghost">Verify Our License</a>
@@ -180,8 +179,8 @@
     </div>
     <div class="filter-bar" id="filterBar">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="domestic_helper">Nonskilled (HK / Malaysia)</button>
-      <button class="filter-btn" data-filter="skilled_worker">Skilled (Saudi)</button>
+      <button class="filter-btn" data-filter="domestic_helper">Nonskilled (Domestic Helper)</button>
+      <button class="filter-btn" data-filter="skilled_worker">Skilled (Professional Worker)</button>
     </div>
     <div class="jobs-grid" id="jobsGrid">
       <p class="empty-note">Loading current openings…</p>
@@ -200,10 +199,10 @@
     <div class="credential-grid">
       <div class="credential">
         <div class="credential-label">Department of Trade and Industry</div>
-        <div class="credential-value">Business Name Certificate No. <span class="mono">2776060</span> — valid until December 12, 2026</div>
+        <div class="credential-value">Business Name Certificate No. <span class="mono">2776060</span> — valid until December 12, 2028</div>
       </div>
       <div class="credential">
-        <div class="credential-label">Philippine Overseas Employment Administration</div>
+        <div class="credential-label">Department of Migrant Workers</div>
         <div class="credential-value">License No. <span class="mono">175-LB-112222-R</span> — valid until January 6, 2027</div>
       </div>
       <div class="credential">
