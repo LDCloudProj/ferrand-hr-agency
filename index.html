@@ -15,7 +15,7 @@
     --paper:#FAFAF9;
     --stamp:#C2410C;
     --gold:#F15A24;
-    --teal:#3C6E62;
+    --teal:#3E6990;
     --ink:#232A33;
     --line: rgba(21,34,56,0.18);
   }
@@ -58,6 +58,7 @@
   section{padding:64px 24px;}
   .section-inner{max-width:1100px; margin:0 auto;}
   .section-head{margin-bottom:32px; max-width:600px;}
+  .about .section-head{max-width:100%;}
   .section-head .eyebrow{color:var(--stamp);}
   .section-head h2{font-size:1.8rem;}
   .section-head p{margin-top:10px; color:#5a5f68;}
@@ -101,7 +102,8 @@
   .about-card{border-top:2px solid var(--gold); padding-top:14px;}
   .about-card h4{font-family:'Fraunces', serif; font-size:1rem; color:var(--paper); margin-bottom:6px;}
   .about-card p{font-size:0.87rem; color:rgba(245,239,225,0.7);}
-  .credential-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:20px 32px; margin-top:36px;}
+  .credential-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:20px 28px; margin-top:36px;}
+  @media (max-width:900px){.credential-grid{grid-template-columns:repeat(2, 1fr);}}
   @media (max-width:640px){.credential-grid{grid-template-columns:1fr;}}
   .credential{border-top:1px solid rgba(201,151,60,0.4); padding-top:10px;}
   .credential-label{font-family:'IBM Plex Mono', monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-bottom:4px;}
@@ -190,9 +192,8 @@
   <div class="section-inner">
     <div class="section-head">
       <div class="eyebrow mono">About Ferrand</div>
-      <h2>Our Company</h2>
-      <p style="font-family:'Fraunces', serif; font-style:italic; font-size:1.15rem; color:var(--gold); font-weight:500; letter-spacing:0.01em;">"Leading You to a Brighter Future"</p>
-      <p style="margin-top:14px;">Ferrand Human Resources International is one of the fastest growing companies in the field of manpower recruitment and human resources, providing specialized, competent, talented, efficient, skilled, and semi-skilled Filipino personnel across various fields of business and industry internationally. We maintain an extensive databank of prospective candidates across different positions, ready for deployment at any given time.</p>
+      <p style="font-family:'Fraunces', serif; font-style:italic; font-size:2.2rem; color:var(--gold); font-weight:500; letter-spacing:0.01em; line-height:1.25;">"Leading You to a Brighter Future"</p>
+      <p style="margin-top:16px; max-width:700px;">Ferrand Human Resources International is one of the fastest growing companies in the field of manpower recruitment and human resources, providing specialized, competent, talented, efficient, skilled, and semi-skilled Filipino personnel across various fields of business and industry internationally. We maintain an extensive databank of prospective candidates across different positions, ready for deployment at any given time.</p>
     </div>
 
     <div class="credential-grid">
@@ -283,7 +284,8 @@
       .from('jobs')
       .select('*')
       .eq('status', 'active')
-      .order('created_at', { ascending: false });
+      .order('category', { ascending: false })
+      .order('title', { ascending: true });
 
     if (error) {
       grid.innerHTML = `<p class="empty-note">Could not load openings right now. Please refresh, or contact us directly.</p>`;

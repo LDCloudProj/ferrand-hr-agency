@@ -10,7 +10,7 @@
 <style>
   :root{
     --navy:#3A3A3C; --navy-deep:#242426; --cream:#F2F2F0; --paper:#FAFAF9;
-    --stamp:#C2410C; --gold:#F15A24; --teal:#3C6E62; --ink:#232A33; --line:rgba(21,34,56,0.15);
+    --stamp:#C2410C; --gold:#F15A24; --teal:#3E6990; --ink:#232A33; --line:rgba(21,34,56,0.15);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{font-family:'IBM Plex Sans', sans-serif; background:var(--paper); color:var(--ink); min-height:100vh;}
@@ -362,7 +362,7 @@
   const categoryLabel = { domestic_helper: "Nonskilled", skilled_worker: "Skilled" };
 
   async function loadJobs(){
-    const { data, error } = await sb.from('jobs').select('*').order('created_at', { ascending: false });
+    const { data, error } = await sb.from('jobs').select('*').order('category', { ascending: false }).order('title', { ascending: true });
     const tbody = document.getElementById('jobsTableBody');
     if (error){ tbody.innerHTML = `<tr><td colspan="8" class="empty-note">Could not load jobs.</td></tr>`; return; }
     jobsCache = data || [];
