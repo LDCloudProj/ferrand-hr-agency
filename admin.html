@@ -49,7 +49,7 @@
 
   main{max-width:1100px; margin:0 auto; padding:24px;}
   .panel{display:none; border:1.5px solid var(--navy); background:var(--paper); padding:28px; overflow-x:auto;}
-  .panel table{min-width:900px;}
+  .panel table{width:100%; table-layout:auto;}
   .panel.active{display:block;}
 
   .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
@@ -104,6 +104,7 @@
     </div>
     <div>
       <span id="userEmail"></span>
+      <button class="btn btn-header btn-sm" id="editNameBtn" style="margin-right:8px;">Edit name</button>
       <button class="btn btn-header btn-sm" id="logoutBtn">Log out</button>
     </div>
   </header>
@@ -114,7 +115,10 @@
       <p style="font-size:0.85rem; color:#6b7078; margin-bottom:16px;">This shows up on job posts and updates you create, so the team knows who did what.</p>
       <form id="nameForm">
         <div class="field"><label>Your name</label><input type="text" id="staffNameInput" placeholder="e.g. Lance" required></div>
-        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Save</button>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">Save</button>
+          <button type="button" class="btn btn-outline" id="cancelNameBtn">Cancel</button>
+        </div>
       </form>
     </div>
   </div>
@@ -260,6 +264,16 @@
     return staffProfiles[userId] || 'Staff';
   }
 
+  async function logAudit(tableName, recordLabel){
+    await sb.from('audit_log').insert({
+      action: 'delete',
+      table_name: tableName,
+      record_label: recordLabel,
+      performed_by: currentUserId,
+      performed_by_name: staffProfiles[currentUserId] || 'Staff'
+    });
+  }
+
   async function checkSession(){
     const { data } = await sb.auth.getSession();
     if (data.session){
@@ -289,6 +303,15 @@
     loadUpdates();
     subscribeToRealtime();
   }
+
+  document.getElementById('cancelNameBtn').addEventListener('click', () => {
+    document.getElementById('nameModal').style.display = 'none';
+  });
+
+  document.getElementById('editNameBtn').addEventListener('click', () => {
+    document.getElementById('staffNameInput').value = staffProfiles[currentUserId] || '';
+    document.getElementById('nameModal').style.display = 'flex';
+  });
 
   document.getElementById('nameForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -473,6 +496,8 @@
   document.getElementById('deleteJobBtn').addEventListener('click', async () => {
     const jobId = document.getElementById('jobId').value;
     if (!confirm('Delete this job posting? This cannot be undone.')) return;
+    const jobTitle = document.getElementById('jTitle').value;
+    await logAudit('jobs', jobTitle);
     const { error } = await sb.from('jobs').delete().eq('id', jobId);
     if (error){ alert('Could not delete job. ' + error.message); return; }
     document.getElementById('jobModal').style.display = 'none';
@@ -506,13 +531,15 @@
         </td>
         <td style="font-size:0.82rem;">${app.status_updated_by ? nameOf(app.status_updated_by) : '—'}</td>
         <td>${(app.cv_path || app.passport_path) ? `<button class="btn btn-danger btn-sm delete-files-btn" data-id="${app.id}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete files</button>` : '—'}</td>
-        <td><button class="btn btn-danger btn-sm delete-app-btn" data-id="${app.id}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete</button></td>
+        <td><button class="btn btn-danger btn-sm delete-app-btn" data-id="${app.id}" data-name="${app.full_name}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete</button></td>
       </tr>
     `).join('');
 
     tbody.querySelectorAll('.delete-app-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm(`Delete this application entirely? This also removes any uploaded CV/passport files. This cannot be undone.`)) return;
+
+        await logAudit('applications', btn.dataset.name);
 
         if (btn.dataset.cv){
           await sb.storage.from('cvs').remove([btn.dataset.cv]);
@@ -693,6 +720,8 @@
   document.getElementById('deleteUpdateBtn').addEventListener('click', async () => {
     const updateId = document.getElementById('updateId').value;
     if (!confirm('Delete this update? Its photos will also be removed.')) return;
+    const updateTitle = document.getElementById('updateTitle').value;
+    await logAudit('deployment_updates', updateTitle);
     if (currentPhotoPaths.length > 0){
       await sb.storage.from('deployment-photos').remove(currentPhotoPaths);
     }
