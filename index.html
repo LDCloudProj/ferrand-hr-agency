@@ -9,12 +9,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --navy:#152238;
-    --navy-deep:#0B1424;
-    --cream:#F5EFE1;
-    --paper:#FBF7EC;
-    --stamp:#9C3B32;
-    --gold:#C9973C;
+    --navy:#3A3A3C;
+    --navy-deep:#242426;
+    --cream:#F2F2F0;
+    --paper:#FAFAF9;
+    --stamp:#C2410C;
+    --gold:#F15A24;
     --teal:#3C6E62;
     --ink:#232A33;
     --line: rgba(21,34,56,0.18);
@@ -101,6 +101,12 @@
   .about-card{border-top:2px solid var(--gold); padding-top:14px;}
   .about-card h4{font-family:'Fraunces', serif; font-size:1rem; color:var(--paper); margin-bottom:6px;}
   .about-card p{font-size:0.87rem; color:rgba(245,239,225,0.7);}
+  .credential-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:20px 32px; margin-top:36px;}
+  @media (max-width:640px){.credential-grid{grid-template-columns:1fr;}}
+  .credential{border-top:1px solid rgba(201,151,60,0.4); padding-top:10px;}
+  .credential-label{font-family:'IBM Plex Mono', monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-bottom:4px;}
+  .credential-value{font-size:0.88rem; color:rgba(245,239,225,0.85);}
+  .credential-value .mono{color:var(--paper); font-weight:600;}
 
   .apply-wrap{background:var(--paper); border:1.5px solid var(--navy); padding:36px; display:grid; gap:18px; max-width:660px;}
   .field{display:flex; flex-direction:column; gap:6px;}
@@ -125,9 +131,12 @@
 
 <header>
   <div class="nav-wrap">
-    <div class="brand">
-      <div class="name">FERRAND <span style="color:var(--gold)">HR</span> International</div>
-      <div class="tag">Human Resources &amp; Overseas Placement</div>
+    <div class="brand" style="display:flex; align-items:center; gap:10px;">
+      <img src="logo.png" alt="Ferrand logo" style="height:36px; width:auto;">
+      <div>
+        <div class="name">FERRAND <span style="color:var(--gold)">HR</span> International</div>
+        <div class="tag">Human Resources &amp; Overseas Placement</div>
+      </div>
     </div>
     <nav>
       <a href="#jobs">Openings</a>
@@ -181,21 +190,27 @@
   <div class="section-inner">
     <div class="section-head">
       <div class="eyebrow mono">About Ferrand</div>
-      <h2>Recruitment done by the book</h2>
-      <p>We exist to make overseas deployment safe, transparent, and properly documented — for the worker and the employer alike.</p>
+      <h2>Our Company</h2>
+      <p style="font-family:'Fraunces', serif; font-style:italic; font-size:1.15rem; color:var(--gold); font-weight:500; letter-spacing:0.01em;">"Leading You to a Brighter Future"</p>
+      <p style="margin-top:14px;">Ferrand Human Resources International is one of the fastest growing companies in the field of manpower recruitment and human resources, providing specialized, competent, talented, efficient, skilled, and semi-skilled Filipino personnel across various fields of business and industry internationally. We maintain an extensive databank of prospective candidates across different positions, ready for deployment at any given time.</p>
     </div>
-    <div class="about-grid">
-      <div class="about-card">
-        <h4>Licensed &amp; Accredited</h4>
-        <p>Operating under POEA/DMW License No. 175-LB-112222-R. Every job order carries its own MWO accreditation number, published alongside the listing.</p>
+
+    <div class="credential-grid">
+      <div class="credential">
+        <div class="credential-label">Department of Trade and Industry</div>
+        <div class="credential-value">Business Name Certificate No. <span class="mono">2776060</span> — valid until December 12, 2026</div>
       </div>
-      <div class="about-card">
-        <h4>Two Placement Tracks</h4>
-        <p>Domestic Helper deployment to Hong Kong and Malaysia, and Skilled Worker deployment to Saudi Arabia — each with its own requirements and process.</p>
+      <div class="credential">
+        <div class="credential-label">Philippine Overseas Employment Administration</div>
+        <div class="credential-value">License No. <span class="mono">175-LB-112222-R</span></div>
       </div>
-      <div class="about-card">
-        <h4>Document Support</h4>
-        <p>From Data Flow/Mumaris registration to contract review, we walk applicants through each requirement before deployment.</p>
+      <div class="credential">
+        <div class="credential-label">Manila Business Permit</div>
+        <div class="credential-value">No. <span class="mono">2026-0031563</span> — valid until December 31, 2026</div>
+      </div>
+      <div class="credential">
+        <div class="credential-label">Bureau of Internal Revenue</div>
+        <div class="credential-value">TIN — <span class="mono">152-406-166-000</span></div>
       </div>
     </div>
   </div>
