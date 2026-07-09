@@ -15,7 +15,8 @@
     --paper:#FAFAF9;
     --stamp:#C2410C;
     --gold:#F15A24;
-    --teal:#3E6990;
+    --teal:#2F8F5B;
+    --slate:#79746C;
     --ink:#232A33;
     --line: rgba(21,34,56,0.18);
   }
@@ -79,10 +80,10 @@
   .job-stub::before, .job-stub::after{content:""; position:absolute; width:16px; height:16px; background:var(--paper); border-radius:50%; left:-8px;}
   .job-stub::before{top:-8px;} .job-stub::after{bottom:-8px;}
   .job-stub .dest{font-family:'Fraunces', serif; font-weight:700; font-size:0.88rem;}
-  .job-stub .code{font-family:'IBM Plex Mono', monospace; font-size:0.6rem; letter-spacing:0.06em; color:var(--gold);}
+  .job-stub .code{font-family:'IBM Plex Mono', monospace; font-size:0.6rem; letter-spacing:0.06em; color:rgba(245,239,225,0.7);}
   .job-tag{display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; margin-bottom:10px; margin-right:6px;}
   .tag-skilled{color:var(--stamp); border:1px solid var(--stamp);}
-  .tag-dh{color:var(--teal); border:1px solid var(--teal);}
+  .tag-dh{color:var(--slate); border:1px solid var(--slate);}
   .tag-nonstop{color:var(--navy-deep); background:var(--gold); border:1px solid var(--gold); font-weight:700;}
   .job-main h3{font-size:1.12rem; margin-bottom:3px;}
   .job-main .employer{font-size:0.82rem; color:#6b7078; margin-bottom:12px;}
@@ -134,7 +135,7 @@
 <header>
   <div class="nav-wrap">
     <div class="brand" style="display:flex; align-items:center; gap:10px;">
-      <img src="logo.png" alt="Ferrand logo" style="height:36px; width:auto;">
+      <img src="logo.png?v=2" alt="Ferrand logo" style="height:36px; width:auto;">
       <div>
         <div class="name">FERRAND <span style="color:var(--gold)">HR</span> International</div>
         <div class="tag">Human Resources &amp; Overseas Placement</div>
@@ -203,7 +204,7 @@
       </div>
       <div class="credential">
         <div class="credential-label">Philippine Overseas Employment Administration</div>
-        <div class="credential-value">License No. <span class="mono">175-LB-112222-R</span></div>
+        <div class="credential-value">License No. <span class="mono">175-LB-112222-R</span> — valid until January 6, 2027</div>
       </div>
       <div class="credential">
         <div class="credential-label">Manila Business Permit</div>
@@ -324,7 +325,7 @@
             ${job.salary ? `<div class="job-salary">${job.salary}</div>` : ''}
             <div class="job-apply"><a href="#apply" data-job-id="${job.id}" class="apply-link">Apply for this role →</a></div>
           </div>
-          <div class="job-stub" style="background:${job.category === 'domestic_helper' ? 'var(--teal)' : 'var(--navy)'}">
+          <div class="job-stub" style="background:${job.category === 'domestic_helper' ? 'var(--slate)' : 'var(--navy)'}">
             <div class="code">${job.category === 'domestic_helper' ? 'DH' : 'SKW'}</div>
             <div class="dest">${job.destination}</div>
             <div class="code">BOARDING</div>
