@@ -57,7 +57,7 @@
 
   table{width:100%; border-collapse:collapse; font-size:0.86rem;}
   th{text-align:left; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); border-bottom:2px solid var(--navy); padding:8px 10px;}
-  td{padding:10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  td{padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; font-size:0.85rem;}
   tr:hover td{background:var(--cream);}
   .badge{font-family:'IBM Plex Mono', monospace; font-size:0.65rem; text-transform:uppercase; padding:3px 8px; border-radius:2px; display:inline-block;}
   .badge-active{border:1px solid var(--teal); color:var(--teal);}
@@ -146,7 +146,7 @@
     <div class="panel" id="appsPanel">
       <div class="panel-head"><h2>Applications</h2></div>
       <table>
-        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Experience</th><th>Message</th><th>CV</th><th>Passport</th><th>Status</th><th>Status by</th><th>Files</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Exp.</th><th>Message</th><th>Documents</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="appsTableBody"></tbody>
       </table>
     </div>
@@ -508,8 +508,8 @@
   async function loadApplications(){
     const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('appsTableBody');
-    if (error){ tbody.innerHTML = `<tr><td colspan="12" class="empty-note">Could not load applications.</td></tr>`; return; }
-    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="12" class="empty-note">No applications yet.</td></tr>`; return; }
+    if (error){ tbody.innerHTML = `<tr><td colspan="9" class="empty-note">Could not load applications.</td></tr>`; return; }
+    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="9" class="empty-note">No applications yet.</td></tr>`; return; }
 
     tbody.innerHTML = data.map(app => `
       <tr>
@@ -518,9 +518,12 @@
         <td>${app.contact_number}${app.email ? '<br><span style="font-size:0.76rem; color:#888;">' + app.email + '</span>' : ''}</td>
         <td>${app.job_title_snapshot || '—'}</td>
         <td>${app.experience || '—'}</td>
-        <td style="max-width:220px;">${app.message || '—'}</td>
-        <td>${app.cv_path ? `<button class="btn btn-outline btn-sm view-cv-btn" data-path="${app.cv_path}">View CV</button>` : '—'}</td>
-        <td>${app.passport_path ? `<button class="btn btn-outline btn-sm view-passport-btn" data-path="${app.passport_path}">View</button>` : '—'}</td>
+        <td style="max-width:160px; font-size:0.82rem;" title="${(app.message || '').replace(/"/g,'&quot;')}">${app.message || '—'}</td>
+        <td>
+          ${app.cv_path ? `<button class="btn btn-outline btn-sm view-cv-btn" data-path="${app.cv_path}">CV</button><br>` : ''}
+          ${app.passport_path ? `<button class="btn btn-outline btn-sm view-passport-btn" data-path="${app.passport_path}" style="margin-top:4px;">Passport</button>` : ''}
+          ${(!app.cv_path && !app.passport_path) ? '—' : ''}
+        </td>
         <td>
           <select class="status-select" data-id="${app.id}">
             <option value="new" ${app.status==='new'?'selected':''}>New</option>
@@ -528,10 +531,12 @@
             <option value="hired" ${app.status==='hired'?'selected':''}>Hired</option>
             <option value="rejected" ${app.status==='rejected'?'selected':''}>Rejected</option>
           </select>
+          <div style="font-size:0.72rem; color:#6b7078; margin-top:4px;">by ${app.status_updated_by ? nameOf(app.status_updated_by) : '—'}</div>
         </td>
-        <td style="font-size:0.82rem;">${app.status_updated_by ? nameOf(app.status_updated_by) : '—'}</td>
-        <td>${(app.cv_path || app.passport_path) ? `<button class="btn btn-danger btn-sm delete-files-btn" data-id="${app.id}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete files</button>` : '—'}</td>
-        <td><button class="btn btn-danger btn-sm delete-app-btn" data-id="${app.id}" data-name="${app.full_name}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete</button></td>
+        <td>
+          ${(app.cv_path || app.passport_path) ? `<button class="btn btn-danger btn-sm delete-files-btn" data-id="${app.id}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}">Delete files</button><br>` : ''}
+          <button class="btn btn-danger btn-sm delete-app-btn" data-id="${app.id}" data-name="${app.full_name}" data-cv="${app.cv_path||''}" data-passport="${app.passport_path||''}" style="margin-top:4px;">Delete all</button>
+        </td>
       </tr>
     `).join('');
 
