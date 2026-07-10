@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Updates — Ferrand HR International</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#3A3A3C; --navy-deep:#242426; --cream:#F2F2F0; --paper:#FAFAF9;
+    --stamp:#C2410C; --gold:#F15A24; --teal:#2F8F5B; --ink:#232A33; --line:rgba(21,34,56,0.18);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'IBM Plex Sans', sans-serif; background:var(--paper); color:var(--ink); line-height:1.5;}
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:700; color:var(--navy);}
+  a{color:inherit; text-decoration:none;}
+
+  header{position:sticky; top:0; z-index:50; background:var(--navy); border-bottom:3px solid var(--gold);}
+  .nav-wrap{max-width:1100px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between;}
+  .brand{color:var(--cream);}
+  .brand .name{font-family:'Fraunces', serif; font-weight:700; font-size:1.3rem;}
+  .brand .tag{font-family:'IBM Plex Mono', monospace; font-size:0.62rem; color:var(--gold); letter-spacing:0.12em; text-transform:uppercase;}
+  nav{display:flex; gap:26px;}
+  nav a{color:var(--cream); font-size:0.9rem; font-weight:500; opacity:0.85;}
+  nav a:hover, nav a.current{opacity:1; color:var(--gold);}
+  @media (max-width:640px){ nav{gap:14px;} nav a{font-size:0.78rem;} }
+
+  .page-head{background:var(--navy); color:var(--cream); padding:48px 24px;}
+  .page-head-inner{max-width:900px; margin:0 auto;}
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.14em; color:var(--gold); text-transform:uppercase; margin-bottom:14px;}
+  .page-head h1{font-size:2rem; color:var(--paper);}
+  .page-head p{margin-top:12px; color:rgba(245,239,225,0.8); font-size:1rem; max-width:600px;}
+
+  main{max-width:900px; margin:0 auto; padding:48px 24px;}
+  .empty-note{color:#6b7078; font-size:0.95rem;}
+
+  .update-card{border:1.5px solid var(--navy); background:var(--paper); margin-bottom:32px; padding:28px 26px;}
+  .update-date{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--stamp); margin-bottom:8px;}
+  .update-title{font-size:1.35rem; margin-bottom:12px;}
+  .update-desc{font-size:0.96rem; color:var(--ink); white-space:pre-wrap; margin-bottom:18px;}
+  .update-photos{display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px;}
+  .update-photos img{width:100%; height:140px; object-fit:cover; border:1px solid var(--line); cursor:pointer;}
+
+  #lightbox{display:none; position:fixed; inset:0; background:rgba(11,20,36,0.9); align-items:center; justify-content:center; z-index:200; padding:24px;}
+  #lightbox img{max-width:100%; max-height:90vh; border:2px solid var(--gold);}
+  #lightbox .close-btn{position:absolute; top:24px; right:32px; color:var(--cream); font-size:2rem; cursor:pointer; font-family:sans-serif;}
+
+  footer{background:var(--navy-deep); color:rgba(245,239,225,0.7); padding:32px 24px; text-align:center; font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <div class="brand" style="display:flex; align-items:center; gap:10px;">
+      <img src="../logo.png?v=2" alt="Ferrand logo" style="height:36px; width:auto;">
+      <div>
+        <div class="name">FERRAND <span style="color:var(--gold)">HR</span> International</div>
+        <div class="tag">Human Resources &amp; Overseas Placement</div>
+      </div>
+    </div>
+    <nav>
+      <a href="/#jobs">Openings</a>
+      <a href="/updates/" class="current">Updates</a>
+      <a href="/#about">About</a>
+      <a href="/#apply">Apply</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-head">
+  <div class="page-head-inner">
+    <div class="eyebrow">Company Updates</div>
+    <h1>What's happening at Ferrand HR</h1>
+    <p>Deployment milestones, new partner employers, and other news from the agency.</p>
+  </div>
+</div>
+
+<main>
+  <div id="updatesList">
+    <p class="empty-note">Loading updates…</p>
+  </div>
+</main>
+
+<div id="lightbox">
+  <span class="close-btn" id="closeLightbox">&times;</span>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<footer>
+  Ferrand Human Resources International — POEA License 175-LB-112222-R
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://mxyxjslxseajyqjqcdxh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_uxkjmFJsOi1dXC90fIjGuQ_nO6X2L9L";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function loadUpdates(){
+    const list = document.getElementById('updatesList');
+    const { data, error } = await sb
+      .from('deployment_updates')
+      .select('*')
+      .order('update_date', { ascending: false });
+
+    if (error){
+      list.innerHTML = `<p class="empty-note">Could not load updates right now.</p>`;
+      console.error(error);
+      return;
+    }
+    if (!data || data.length === 0){
+      list.innerHTML = `<p class="empty-note">No updates posted yet. Check back soon.</p>`;
+      return;
+    }
+
+    list.innerHTML = data.map(u => {
+      const dateStr = new Date(u.update_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      const photos = (u.photo_paths || []).map(p => sb.storage.from('deployment-photos').getPublicUrl(p).data.publicUrl);
+      return `
+        <div class="update-card">
+          <div class="update-date">${dateStr}</div>
+          <div class="update-title">${u.title || u.description.slice(0, 60)}</div>
+          <div class="update-desc">${u.description}</div>
+          ${photos.length ? `<div class="update-photos">${photos.map(url => `<img src="${url}" alt="">`).join('')}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.update-photos img').forEach(img => {
+      img.addEventListener('click', () => {
+        document.getElementById('lightboxImg').src = img.src;
+        document.getElementById('lightbox').style.display = 'flex';
+      });
+    });
+  }
+
+  document.getElementById('closeLightbox').addEventListener('click', () => {
+    document.getElementById('lightbox').style.display = 'none';
+  });
+  document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox') document.getElementById('lightbox').style.display = 'none';
+  });
+
+  loadUpdates();
+</script>
+
+</body>
+</html>
