@@ -113,12 +113,13 @@
   .credential-value{font-size:0.88rem; color:rgba(245,239,225,0.85);}
   .credential-value .mono{color:var(--paper); font-weight:600;}
 
-  .apply-wrap{background:var(--paper); border:1.5px solid var(--navy); padding:36px; display:grid; gap:18px; max-width:660px;}
-  .field{display:flex; flex-direction:column; gap:6px;}
+  .apply-wrap{background:var(--paper); border:1.5px solid var(--navy); padding:36px; display:grid; gap:18px; max-width:660px; min-width:0;}
+  .field{display:flex; flex-direction:column; gap:6px; min-width:0;}
   .field label{font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--navy); font-family:'IBM Plex Mono', monospace;}
-  .field input, .field select, .field textarea{border:1.5px solid var(--line); background:var(--paper); padding:10px 12px; font-family:'IBM Plex Sans', sans-serif; font-size:0.92rem; color:var(--ink); border-radius:2px;}
+  .field input, .field select, .field textarea{width:100%; max-width:100%; border:1.5px solid var(--line); background:var(--paper); padding:10px 12px; font-family:'IBM Plex Sans', sans-serif; font-size:0.92rem; color:var(--ink); border-radius:2px;}
+  .field input[type="file"]{padding:8px 6px; font-size:0.82rem;}
   .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--stamp);}
-  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:18px; min-width:0;}
   @media (max-width:520px){.row-2{grid-template-columns:1fr;}}
   #formStatus{font-size:0.86rem; font-weight:600; margin-top:4px;}
 
