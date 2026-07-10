@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Staff Dashboard — Ferrand HR</title>
+<link rel="icon" type="image/png" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -246,7 +248,13 @@
 <script>
   const SUPABASE_URL = "https://mxyxjslxseajyqjqcdxh.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_uxkjmFJsOi1dXC90fIjGuQ_nO6X2L9L";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      storage: window.sessionStorage,
+      persistSession: true,
+      autoRefreshToken: true
+    }
+  });
 
   const loginScreen = document.getElementById('loginScreen');
   const dashboard = document.getElementById('dashboard');
@@ -304,6 +312,27 @@
     loadApplications();
     loadUpdates();
     subscribeToRealtime();
+    startIdleTimer();
+  }
+
+  // ---- AUTO-LOGOUT AFTER INACTIVITY ----
+  const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
+  let idleTimer = null;
+
+  function startIdleTimer(){
+    resetIdleTimer();
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimer);
+    });
+  }
+
+  function resetIdleTimer(){
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(async () => {
+      await sb.auth.signOut();
+      alert('You were logged out after 1 hour of inactivity.');
+      location.reload();
+    }, IDLE_TIMEOUT_MS);
   }
 
   document.getElementById('cancelNameBtn').addEventListener('click', () => {
