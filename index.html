@@ -186,7 +186,7 @@
     <h1><span style="color:var(--gold);">FERRAND</span> — your avenue to express your skills as a Professional, Skilled, or Semi-Skilled Worker, or as a Domestic Helper.<span class="hero-detail">Now hiring for deployment to Hong Kong, Singapore, Malaysia, Dubai/UAE, and Saudi Arabia — properly licensed and documented every step of the way.</span></h1>
     <div class="hero-ctas">
       <a href="#jobs" class="btn btn-primary">View Open Positions</a>
-      <a href="https://dmw.gov.ph/licensed-recruitment-agencies" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Verify Our License</a>
+      <a href="https://dmw.gov.ph/inquiry/licensed-recruitment-agencies" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Verify Our License</a>
     </div>
   </div>
 </section>
@@ -450,6 +450,16 @@
   });
 
   loadJobs();
+
+  // Clean up the URL after landing on a section, so the address bar
+  // shows the plain root URL on refresh/share instead of keeping #hash.
+  if (window.location.hash) {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        history.replaceState(null, '', window.location.pathname);
+      }, 600);
+    });
+  }
 </script>
 
 </body>
