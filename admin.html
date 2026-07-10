@@ -106,7 +106,6 @@
     </div>
     <div>
       <span id="userEmail"></span>
-      <button class="btn btn-header btn-sm" id="editNameBtn" style="margin-right:8px;">Edit name</button>
       <button class="btn btn-header btn-sm" id="logoutBtn">Log out</button>
     </div>
   </header>
@@ -337,11 +336,6 @@
 
   document.getElementById('cancelNameBtn').addEventListener('click', () => {
     document.getElementById('nameModal').style.display = 'none';
-  });
-
-  document.getElementById('editNameBtn').addEventListener('click', () => {
-    document.getElementById('staffNameInput').value = staffProfiles[currentUserId] || '';
-    document.getElementById('nameModal').style.display = 'flex';
   });
 
   document.getElementById('nameForm').addEventListener('submit', async (e) => {
