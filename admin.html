@@ -49,6 +49,10 @@
   .tab-btn{font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.04em; text-transform:uppercase; padding:10px 18px; border:1.5px solid var(--navy); background:transparent; color:var(--navy); cursor:pointer; border-bottom:none;}
   .tab-btn.active{background:var(--navy); color:var(--cream);}
 
+  .app-filter-btn{font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; padding:8px 14px; border:1.5px solid var(--navy); background:transparent; color:var(--navy); cursor:pointer;}
+  .app-filter-btn.active{background:var(--navy); color:var(--cream);}
+  .app-filters{display:flex; gap:8px; flex-wrap:wrap;}
+
   main{max-width:1100px; margin:0 auto; padding:24px;}
   .panel{display:none; border:1.5px solid var(--navy); background:var(--paper); padding:28px; overflow-x:auto;}
   .panel table{width:100%; table-layout:auto;}
@@ -145,7 +149,14 @@
 
     <!-- APPLICATIONS PANEL -->
     <div class="panel" id="appsPanel">
-      <div class="panel-head"><h2>Applications</h2></div>
+      <div class="panel-head">
+        <h2>Applications</h2>
+        <div class="app-filters">
+          <button class="app-filter-btn active" data-app-filter="all">All</button>
+          <button class="app-filter-btn" data-app-filter="domestic_helper">Domestic Helper</button>
+          <button class="app-filter-btn" data-app-filter="skilled_worker">Professional / Skilled</button>
+        </div>
+      </div>
       <table>
         <thead><tr><th>Date</th><th>Applicant</th><th>Contact</th><th>Position</th><th>Exp.</th><th>Message</th><th>Documents</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="appsTableBody"></tbody>
@@ -406,6 +417,15 @@
     });
   });
 
+  document.querySelectorAll('.app-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.app-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentAppFilter = btn.dataset.appFilter;
+      renderApplications();
+    });
+  });
+
   // ---- JOBS ----
   let jobsCache = [];
   const categoryLabel = { domestic_helper: "Nonskilled", skilled_worker: "Skilled" };
@@ -530,13 +550,31 @@
   });
 
   // ---- APPLICATIONS ----
+  let appsCache = [];
+  let currentAppFilter = 'all';
+
   async function loadApplications(){
     const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('appsTableBody');
     if (error){ tbody.innerHTML = `<tr><td colspan="9" class="empty-note">Could not load applications.</td></tr>`; return; }
-    if (!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="9" class="empty-note">No applications yet.</td></tr>`; return; }
+    appsCache = data || [];
+    renderApplications();
+  }
 
-    tbody.innerHTML = data.map(app => `
+  function renderApplications(){
+    const tbody = document.getElementById('appsTableBody');
+
+    let list = appsCache;
+    if (currentAppFilter !== 'all'){
+      list = appsCache.filter(app => {
+        const job = jobsCache.find(j => j.id === app.job_id);
+        return job && job.category === currentAppFilter;
+      });
+    }
+
+    if (list.length === 0){ tbody.innerHTML = `<tr><td colspan="9" class="empty-note">No applications found.</td></tr>`; return; }
+
+    tbody.innerHTML = list.map(app => `
       <tr>
         <td class="mono" style="font-size:0.76rem;">${new Date(app.created_at).toLocaleDateString()}</td>
         <td><strong>${app.full_name}</strong></td>
